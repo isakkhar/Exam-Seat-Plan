@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Exam Seat Plan Maker
+
+A professional, web-based tool built with **Next.js** to generate and print exam seat plans. This application allows you to manage rooms, upload student lists via Excel/CSV, and automatically generates print-ready seat slips in a 3x3 grid layout (9 slips per A4 page).
+
+## Features
+
+- **Automated Seating**: Intelligently mixes students from different classes so that no two students from the same class sit side-by-side.
+- **Bulk Upload**: Import student data easily via `.csv` or `.xlsx` files.
+- **Room Management**: Add, remove, and manage rooms with specific seat capacities.
+- **Print-Ready Layout**: Generates a 3x3 grid of seat slips per page, perfectly sized for A4 paper.
+- **Custom Branding**: Includes your organization's logo and tagline on every seat slip.
+- **Professional Design**: Modern, clean UI with glassmorphism effects and optimized print styles.
 
 ## Getting Started
 
-First, run the development server:
+### 1. Installation
+
+First, clone the repository and install the dependencies:
+
+```bash
+npm install
+```
+
+### 2. Running Locally
+
+Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Usage Guide
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1.  **Manage Rooms**: On the dashboard, add your rooms and specify the number of seats available in each.
+2.  **Upload Data**: Upload your student list. The file should be a `.csv` or `.xlsx` file.
+    -   **Required Columns**: `ID`, `Name`, `Class`. (Case-insensitive)
+3.  **Generate**: Click "Generate Seat Plan". The system will distribute students across rooms based on your rules.
+4.  **Print**: Go to the result page and click "Print All Slips".
+    -   **Note**: In the print dialog, Ensure **Layout** is set to **Portrait** and **Margins** are set to **None** or **Default** for the best result.
 
-## Learn More
+## Data Format Example
 
-To learn more about Next.js, take a look at the following resources:
+See the provided `sample_students.csv` for reference. It should look like this:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| ID | Name | Class |
+| :--- | :--- | :--- |
+| 1001 | John Doe | 9 |
+| 1002 | Jane Smith | 10 |
+| ... | ... | ... |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Technologies Used
 
-## Deploy on Vercel
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Vanilla CSS + CSS Modules
+- **Icons**: Lucide React
+- **Data Parsing**: XLSX
+- **Persistence**: LocalStorage (Data stays even after refresh)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
