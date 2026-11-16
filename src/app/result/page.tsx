@@ -372,20 +372,24 @@ export default function ResultPage() {
                     display: 'grid', 
                     gridTemplateColumns: 'repeat(3, 1fr)', 
                     gridTemplateRows: 'repeat(3, 1fr)',
-                    gap: '0', 
-                    border: '1.5px dashed #94a3b8',
+                    gap: '7mm', 
+                    padding: '6mm 5mm',
                     width: '100%',
                     maxWidth: '210mm',
-                    minHeight: '27.7cm',
-                    margin: '0 auto'
+                    height: '290mm',
+                    maxHeight: '295mm',
+                    margin: '0 auto',
+                    boxSizing: 'border-box'
                   }}>
                     {seatChunk.map((student) => (
                       <div key={student.id} style={{ 
-                        border: '1px dashed #cbd5e1', 
-                        padding: '0.25rem', 
-                        height: '9.2cm', 
+                        border: '1.5px dashed #94a3b8', 
+                        borderRadius: '8px',
+                        padding: '3px', 
+                        height: '100%',
                         backgroundColor: '#ffffff',
-                        boxSizing: 'border-box'
+                        boxSizing: 'border-box',
+                        position: 'relative'
                       }}>
                         {/* Inner Premium Card Frame */}
                         <div style={{
@@ -565,7 +569,7 @@ export default function ResultPage() {
 
                     {/* Fill empty cells to maintain 3x3 grid */}
                     {Array.from({ length: 9 - seatChunk.length }).map((_, i) => (
-                      <div key={`empty-${i}`} style={{ border: '1px solid #ccfbf1', background: '#fafafa' }} />
+                      <div key={`empty-${i}`} style={{ border: '1px dashed #cbd5e1', borderRadius: '8px', background: '#fafafa', height: '100%' }} />
                     ))}
                   </div>
                 </div>
