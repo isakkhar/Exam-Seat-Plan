@@ -14,9 +14,9 @@ import {
   CheckCircle2, 
   BookOpen, 
   Building2,
-  Image as ImageIcon,
   Compass,
-  Sparkles
+  Sparkles,
+  CheckCircle
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -49,17 +49,6 @@ export default function Dashboard() {
     router.push('/result');
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setExamInfo(prev => ({ ...prev, customLogoUrl: reader.result as string }));
-    };
-    reader.readAsDataURL(file);
-  };
-
   const handleDownloadSample = () => {
     const csvContent = "data:text/csv;charset=utf-8,ID,Name,Class\n101,Rahim Ahmed,Class 9\n102,Karim Ullah,Class 10\n103,Fatima Begum,Class 9\n104,Tanvir Hasan,Class 10\n105,Sadia Islam,Class 8\n106,Nabil Hossain,Class 8\n107,Afsana Mimi,Class 9\n108,Mehedi Hasan,Class 10";
     const encodedUri = encodeURI(csvContent);
@@ -73,19 +62,29 @@ export default function Dashboard() {
 
   return (
     <main className="container">
-      {/* Header with Teal Gradient */}
-      <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--primary-tint)', color: 'var(--primary-hover)', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.5rem', border: '1px solid var(--primary-border)' }}>
-            <Sparkles size={14} /> Smart Exam & Seating Management
+      {/* Header with Deep Purple Gradient & Logos */}
+      <header className="glass-card" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', padding: '1.25rem 1.75rem', borderTop: '4px solid var(--primary)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
+          {/* Main Logo & Tagline Displays */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', background: '#ffffff', padding: '0.45rem 0.85rem', borderRadius: '0.6rem', border: '1.5px solid var(--primary-border)', boxShadow: '0 2px 8px rgba(107, 33, 168, 0.1)' }}>
+            <img src="/logo/logo.png" alt="Logo" style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
+            <div style={{ width: '1px', height: '32px', background: 'var(--primary-border)' }} />
+            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '40px', width: 'auto', maxWidth: '130px', objectFit: 'contain' }} />
           </div>
-          <h1 style={{ fontSize: '2.4rem', fontWeight: '800', background: 'linear-gradient(to right, #0d9488, #0284c7)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0, letterSpacing: '-0.5px' }}>
-            Exam Seat Plan Maker
-          </h1>
-          <p style={{ color: 'var(--text-muted)', marginTop: '0.3rem', fontSize: '0.95rem' }}>
-            সিট প্ল্যান, ৩x৩ ডেস্ক স্লিপ, নোটিশ বোর্ড সামারি এবং পরীক্ষার প্রবেশপত্র (Admit Card) তৈরি করুন।
-          </p>
+
+          <div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--primary-tint)', color: 'var(--primary)', padding: '0.2rem 0.65rem', borderRadius: '1rem', fontSize: '0.78rem', fontWeight: 800, marginBottom: '0.3rem', border: '1px solid var(--primary-border)' }}>
+              <Sparkles size={13} /> Deep Purple Edition
+            </div>
+            <h1 style={{ fontSize: '2.1rem', fontWeight: '900', background: 'linear-gradient(to right, #6b21a8, #9333ea, #4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0, letterSpacing: '-0.5px' }}>
+              Exam Seat Plan Maker
+            </h1>
+            <p style={{ color: 'var(--text-muted)', marginTop: '0.2rem', fontSize: '0.9rem' }}>
+              সিট প্ল্যান, ৩x৩ ডেস্ক স্লিপ, নোটিশ বোর্ড সামারি এবং প্রবেশপত্র (Admit Card) তৈরি করুন।
+            </p>
+          </div>
         </div>
+
         <div style={{ display: 'flex', gap: '0.75rem' }}>
           <button onClick={handleDownloadSample} className="button button-secondary" style={{ background: 'transparent', border: '1.5px solid var(--secondary)', color: 'var(--secondary)', boxShadow: 'none' }}>
             <Download size={18} /> Sample CSV
@@ -98,7 +97,7 @@ export default function Dashboard() {
 
       {/* Institution Details & Seating Configuration Section */}
       <section className="glass-card" style={{ marginBottom: '2rem', borderTop: '4px solid var(--primary)' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-hover)' }}>
+        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)' }}>
           <BookOpen size={20} color="var(--primary)" /> প্রতিষ্ঠান ও পরীক্ষার তথ্য (Institution & Exam Setup)
         </h3>
 
@@ -109,7 +108,7 @@ export default function Dashboard() {
             </label>
             <input 
               className="input" 
-              placeholder="e.g. Dhaka Residential Model College" 
+              placeholder="e.g. Model School & College" 
               value={examInfo.institutionName}
               onChange={e => setExamInfo(prev => ({ ...prev, institutionName: e.target.value }))}
             />
@@ -152,27 +151,22 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Custom Logo Upload & Seating Pattern Select */}
+        {/* Logo and Tagline Status & Seating Pattern Select */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'center', paddingTop: '1rem', borderTop: '1px dashed var(--primary-border)' }}>
-          {/* Logo Uploader */}
+          {/* Logo & Tagline Status */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '56px', height: '56px', border: '1px solid var(--primary-border)', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--card-bg)', overflow: 'hidden', flexShrink: 0 }}>
-              {examInfo.customLogoUrl ? (
-                <img src={examInfo.customLogoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-              ) : (
-                <ImageIcon size={28} color="var(--primary)" />
-              )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', padding: '0.35rem 0.65rem', borderRadius: '0.5rem', border: '1.5px solid var(--primary-border)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+              <img src="/logo/logo.png" alt="Logo" style={{ height: '28px', width: 'auto' }} />
+              <span style={{ color: '#d8b4fe' }}>•</span>
+              <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '32px', width: 'auto', maxWidth: '100px' }} />
             </div>
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '0.2rem' }}>
-                প্রতিষ্ঠানের নিজস্ব লোগো আপলোড
-              </label>
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={handleLogoUpload}
-                style={{ fontSize: '0.8rem' }}
-              />
+              <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <CheckCircle size={15} /> অফিশিয়াল লোগো ও ট্যাগলাইন সক্রিয়
+              </div>
+              <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                সিট স্লিপ, এডমিট কার্ড, নোটিশ বোর্ড ও সব প্রিন্ট শিটে দৃশ্যমান
+              </span>
             </div>
           </div>
 
@@ -193,7 +187,7 @@ export default function Dashboard() {
                   fontWeight: 700,
                   border: seatingPattern === 'snake' ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
                   background: seatingPattern === 'snake' ? 'var(--primary-tint)' : 'var(--btn-unselected-bg)',
-                  color: seatingPattern === 'snake' ? 'var(--primary-hover)' : 'var(--foreground)',
+                  color: seatingPattern === 'snake' ? 'var(--primary)' : 'var(--foreground)',
                   cursor: 'pointer'
                 }}
               >
@@ -211,7 +205,7 @@ export default function Dashboard() {
                   fontWeight: 700,
                   border: seatingPattern === 'column-wise' ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
                   background: seatingPattern === 'column-wise' ? 'var(--primary-tint)' : 'var(--btn-unselected-bg)',
-                  color: seatingPattern === 'column-wise' ? 'var(--primary-hover)' : 'var(--foreground)',
+                  color: seatingPattern === 'column-wise' ? 'var(--primary)' : 'var(--foreground)',
                   cursor: 'pointer'
                 }}
               >
@@ -229,7 +223,7 @@ export default function Dashboard() {
                   fontWeight: 700,
                   border: seatingPattern === 'row-wise' ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
                   background: seatingPattern === 'row-wise' ? 'var(--primary-tint)' : 'var(--btn-unselected-bg)',
-                  color: seatingPattern === 'row-wise' ? 'var(--primary-hover)' : 'var(--foreground)',
+                  color: seatingPattern === 'row-wise' ? 'var(--primary)' : 'var(--foreground)',
                   cursor: 'pointer'
                 }}
               >
@@ -248,7 +242,7 @@ export default function Dashboard() {
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>মোট রুম ও সিট</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary-hover)' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
               {rooms.length} Rooms / {totalSeats} Seats
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>বেঞ্চ প্রতি ১ জন পরীক্ষার্থী</div>
@@ -256,7 +250,7 @@ export default function Dashboard() {
         </div>
 
         <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--secondary)' }}>
-          <div style={{ background: 'rgba(2, 132, 199, 0.1)', padding: '0.85rem', borderRadius: '0.75rem', color: 'var(--secondary)' }}>
+          <div style={{ background: 'rgba(79, 70, 229, 0.1)', padding: '0.85rem', borderRadius: '0.75rem', color: 'var(--secondary)' }}>
             <Users size={28} />
           </div>
           <div>
@@ -274,7 +268,7 @@ export default function Dashboard() {
           display: 'flex', 
           alignItems: 'center', 
           gap: '1rem',
-          borderLeft: isShortage ? '4px solid #ef4444' : '4px solid #0d9488'
+          borderLeft: isShortage ? '4px solid #ef4444' : '4px solid var(--primary)'
         }}>
           <div style={{ 
             background: isShortage ? 'rgba(239, 68, 68, 0.12)' : 'var(--primary-tint)', 
@@ -286,7 +280,7 @@ export default function Dashboard() {
           </div>
           <div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>সিট ক্যাপাসিটি অবস্থা</div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isShortage ? '#ef4444' : 'var(--primary-hover)' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isShortage ? '#ef4444' : 'var(--primary)' }}>
               {totalStudents === 0 ? 'ডেটা আপলোড করুন' : isShortage ? `সিট ঘাটতি: ${totalStudents - totalSeats} টি` : `পর্যাপ্ত (${surplusSeats} টি সিট খালি)`}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -307,12 +301,12 @@ export default function Dashboard() {
         <div className="glass-card" style={{ marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, color: 'var(--primary-hover)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, color: 'var(--primary)' }}>
                 <Users size={24} color="var(--primary)" /> আপলোডকৃত শিক্ষার্থী ({students.length})
               </h2>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.5rem' }}>
                 {Object.entries(classBreakdown).map(([cls, count]) => (
-                  <span key={cls} style={{ fontSize: '0.75rem', background: 'var(--primary-tint)', color: 'var(--primary-hover)', padding: '0.2rem 0.55rem', borderRadius: '0.35rem', border: '1px solid var(--primary-border)', fontWeight: 600 }}>
+                  <span key={cls} style={{ fontSize: '0.75rem', background: 'var(--primary-tint)', color: 'var(--primary)', padding: '0.2rem 0.55rem', borderRadius: '0.35rem', border: '1px solid var(--primary-border)', fontWeight: 700 }}>
                     <strong>{cls}:</strong> {count} জন
                   </span>
                 ))}
@@ -344,7 +338,7 @@ export default function Dashboard() {
                     <td><span style={{ fontWeight: 700, color: 'var(--foreground)' }}>{s.id}</span></td>
                     <td>{s.name}</td>
                     <td>
-                      <span style={{ background: 'var(--primary-tint)', color: 'var(--primary-hover)', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.85rem', fontWeight: 700, border: '1px solid var(--primary-border)' }}>
+                      <span style={{ background: 'var(--primary-tint)', color: 'var(--primary)', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.85rem', fontWeight: 700, border: '1px solid var(--primary-border)' }}>
                         {s.className}
                       </span>
                     </td>
@@ -366,7 +360,7 @@ export default function Dashboard() {
       {rooms.length > 0 && students.length === 0 && (
         <div style={{ textAlign: 'center', padding: '3.5rem', opacity: 0.7 }}>
           <Users size={56} style={{ margin: '0 auto 1rem', display: 'block', color: 'var(--primary)' }} />
-          <h3 style={{ color: 'var(--primary-hover)' }}>শিক্ষার্থীদের তালিকা (CSV/Excel) আপলোড করুন</h3>
+          <h3 style={{ color: 'var(--primary)' }}>শিক্ষার্থীদের তালিকা (CSV/Excel) আপলোড করুন</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>ডানপাশের প্যানেল থেকে ফাইল ড্র্যাগ বা সিলেক্ট করুন</p>
         </div>
       )}

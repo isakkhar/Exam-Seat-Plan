@@ -15,23 +15,21 @@ import {
   X,
   CreditCard,
   ArrowLeftRight,
-  Check,
-  Building,
-  UserCheck
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 
 type ViewMode = 'slips' | 'visual' | 'notice' | 'attendance' | 'admit';
 
-// Palette for different classes in visual room layout
+// Deep Purple and complementary pastel colors for visual room layout
 const CLASS_COLORS = [
-  { bg: '#f0fdfa', border: '#0d9488', text: '#115e59' }, // Teal
-  { bg: '#f0f9ff', border: '#0284c7', text: '#075985' }, // Sky
-  { bg: '#fefce8', border: '#ca8a04', text: '#854d0e' }, // Amber
+  { bg: '#faf5ff', border: '#7e22ce', text: '#581c87' }, // Deep Purple
+  { bg: '#eef2ff', border: '#4f46e5', text: '#312e81' }, // Indigo
   { bg: '#fdf2f8', border: '#db2777', text: '#9d174d' }, // Pink
-  { bg: '#f5f3ff', border: '#7c3aed', text: '#5b21b6' }, // Purple
-  { bg: '#fff7ed', border: '#ea580c', text: '#9a3412' }, // Orange
-  { bg: '#f0fdf4', border: '#16a34a', text: '#166534' }, // Green
+  { bg: '#f0fdfa', border: '#0d9488', text: '#115e59' }, // Teal
+  { bg: '#fffbeb', border: '#d97706', text: '#92400e' }, // Amber
+  { bg: '#f0fdf4', border: '#16a34a', text: '#166534' }, // Emerald
+  { bg: '#fff1f2', border: '#e11d48', text: '#881337' }, // Rose
   { bg: '#f8fafc', border: '#475569', text: '#1e293b' }, // Slate
 ];
 
@@ -56,7 +54,7 @@ export default function ResultPage() {
   if (roomNames.length === 0) {
     return (
       <div className="container" style={{ textAlign: 'center', paddingTop: '4rem' }}>
-        <h2 style={{ color: 'var(--primary-hover)' }}>কোন সিট প্ল্যান তৈরি করা হয়নি।</h2>
+        <h2 style={{ color: 'var(--primary)' }}>কোন সিট প্ল্যান তৈরি করা হয়নি।</h2>
         <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
           অনুগ্রহ করে ড্যাশবোর্ড থেকে রুম এবং শিক্ষার্থী ডেটা দিয়ে সিট প্ল্যান জেনারেট করুন।
         </p>
@@ -67,7 +65,7 @@ export default function ResultPage() {
     );
   }
 
-  // Chunk array into sizes of N (9 for slips, 2 or 4 for admits)
+  // Chunk array into sizes of N (9 for slips, 2 for admits)
   const chunk = <T,>(arr: T[], size: number): T[][] => {
     const result: T[][] = [];
     for (let i = 0; i < arr.length; i += size) {
@@ -156,11 +154,19 @@ export default function ResultPage() {
     <main className="container">
       {/* Top action bar - Hidden when printing */}
       <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <Link href="/" className="button" style={{ background: 'transparent', border: '1.5px solid var(--primary)', color: 'var(--primary-hover)', boxShadow: 'none' }}>
-          <ChevronLeft size={20} /> Dashboard
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <Link href="/" className="button" style={{ background: 'transparent', border: '1.5px solid var(--primary)', color: 'var(--primary)', boxShadow: 'none' }}>
+            <ChevronLeft size={20} /> Dashboard
+          </Link>
+          {/* Logo & Tagline Pill in Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', padding: '0.25rem 0.6rem', borderRadius: '0.5rem', border: '1px solid var(--primary-border)' }}>
+            <img src="/logo/logo.png" alt="Logo" style={{ height: '24px', width: 'auto' }} />
+            <span style={{ color: '#d8b4fe' }}>•</span>
+            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '26px', width: 'auto', maxWidth: '80px' }} />
+          </div>
+        </div>
 
-        {/* View Mode Tabs (Teal themed) */}
+        {/* View Mode Tabs (Deep Purple themed) */}
         <div style={{ display: 'flex', background: 'var(--card-bg)', padding: '0.25rem', borderRadius: '0.6rem', border: '1px solid var(--primary-border)', gap: '0.25rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveTab('slips')}
@@ -293,7 +299,7 @@ export default function ResultPage() {
       {searchQuery.trim() && (
         <div className="no-print glass-card" style={{ marginBottom: '1.5rem', border: '2px solid var(--primary)', background: 'var(--card-bg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <h4 style={{ margin: 0, color: 'var(--primary-hover)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h4 style={{ margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Search size={18} /> সার্চ ফলাফল ({searchResults.length} জন পাওয়া গেছে)
             </h4>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -336,7 +342,7 @@ export default function ResultPage() {
                     <span style={{ background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontWeight: 700 }}>
                       Room {st.roomName}
                     </span>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--primary-hover)', fontWeight: 800, marginTop: '0.2rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 800, marginTop: '0.2rem' }}>
                       {st.seatNumber || 'Seat 1'}
                     </div>
                   </div>
@@ -348,7 +354,7 @@ export default function ResultPage() {
       )}
 
       {/* ========================================================= */}
-      {/* 1. SEAT SLIPS (3x3 Grid Layout)                           */}
+      {/* 1. SEAT SLIPS (3x3 Grid Layout with Logo & Tagline)       */}
       {/* ========================================================= */}
       {activeTab === 'slips' && (
         <div id="printable-area">
@@ -364,10 +370,11 @@ export default function ResultPage() {
               >
                 <div style={{ padding: '0.5rem', border: '1px solid var(--primary-border)', borderRadius: '0.5rem', background: 'white' }}>
                   <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                    <strong style={{ color: 'var(--primary-hover)' }}>Room: {roomName} — Page {chunkIndex + 1} of {chunks.length}</strong>
+                    <strong style={{ color: 'var(--primary)' }}>Room: {roomName} — Page {chunkIndex + 1} of {chunks.length}</strong>
                     <span>({seatChunk.length} Slips on this page)</span>
                   </div>
                   
+                  {/* 3x3 Grid with 7mm Cutting Gutter */}
                   <div style={{ 
                     display: 'grid', 
                     gridTemplateColumns: 'repeat(3, 1fr)', 
@@ -383,7 +390,7 @@ export default function ResultPage() {
                   }}>
                     {seatChunk.map((student) => (
                       <div key={student.id} style={{ 
-                        border: '1.5px dashed #94a3b8', 
+                        border: '1.5px dashed #a855f7', 
                         borderRadius: '8px',
                         padding: '3px', 
                         height: '100%',
@@ -391,9 +398,9 @@ export default function ResultPage() {
                         boxSizing: 'border-box',
                         position: 'relative'
                       }}>
-                        {/* Inner Premium Card Frame */}
+                        {/* Inner Deep Purple Card Frame */}
                         <div style={{
-                          border: '2px solid #0f766e',
+                          border: '2px solid #6b21a8',
                           borderRadius: '6px',
                           height: '100%',
                           display: 'flex',
@@ -401,61 +408,70 @@ export default function ResultPage() {
                           justifyContent: 'space-between',
                           overflow: 'hidden',
                           backgroundColor: '#ffffff',
-                          boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+                          boxShadow: '0 2px 6px rgba(107, 33, 168, 0.1)'
                         }}>
-                          {/* 1. Header with Institution Branding */}
-                          <div style={{ 
-                            background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)', 
-                            padding: '0.45rem 0.55rem',
-                            color: '#ffffff',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            borderBottom: '2px solid #134e4a'
-                          }}>
+                          {/* 1. Header with BOTH Logo & Tagline */}
+                          <div>
                             <div style={{ 
-                              background: '#ffffff', 
-                              borderRadius: '4px', 
-                              padding: '2px', 
-                              display: 'flex', 
-                              alignItems: 'center', 
-                              justifyContent: 'center',
-                              flexShrink: 0,
-                              width: '32px',
-                              height: '32px'
+                              background: 'linear-gradient(135deg, #4c1d95 0%, #6b21a8 50%, #7e22ce 100%)', 
+                              padding: '0.4rem 0.55rem',
+                              color: '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '0.4rem',
+                              borderBottom: '2px solid #3b0764'
                             }}>
-                              <img 
-                                src={examInfo.customLogoUrl || "/logo/logo.png"} 
-                                alt="Logo" 
-                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
-                              />
+                              {/* Left: Main Logo */}
+                              <div style={{ 
+                                background: '#ffffff', 
+                                borderRadius: '4px', 
+                                padding: '2px 5px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                flexShrink: 0
+                              }}>
+                                <img 
+                                  src="/logo/logo.png" 
+                                  alt="Logo" 
+                                  style={{ height: '22px', width: 'auto', maxWidth: '85px', objectFit: 'contain' }} 
+                                />
+                              </div>
+
+                              {/* Right: Tagline */}
+                              <div style={{ 
+                                background: '#ffffff', 
+                                borderRadius: '4px', 
+                                padding: '2px 5px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                flexShrink: 0
+                              }}>
+                                <img 
+                                  src="/logo/tagline_1.png" 
+                                  alt="Tagline" 
+                                  style={{ height: '26px', width: 'auto', maxWidth: '85px', objectFit: 'contain' }} 
+                                />
+                              </div>
                             </div>
-                            <div style={{ flexGrow: 1, overflow: 'hidden' }}>
-                              <div style={{ 
-                                fontSize: '0.78rem', 
-                                fontWeight: 900, 
-                                textTransform: 'uppercase', 
-                                letterSpacing: '0.3px', 
-                                whiteSpace: 'nowrap', 
-                                overflow: 'hidden', 
-                                textOverflow: 'ellipsis',
-                                color: '#ffffff',
-                                lineHeight: '1.15'
-                              }}>
-                                {examInfo.institutionName || 'Model School & College'}
-                              </div>
-                              <div style={{ 
-                                fontSize: '0.66rem', 
-                                color: '#ccfbf1', 
-                                fontWeight: 700, 
-                                marginTop: '0.1rem',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                              }}>
-                                {examInfo.title || 'Examination 2026'}
-                                {examInfo.subject && ` • ${examInfo.subject}`}
-                              </div>
+
+                            {/* Institution Name & Exam Subheader */}
+                            <div style={{ 
+                              background: '#faf5ff', 
+                              borderBottom: '1px solid #e9d5ff', 
+                              padding: '0.2rem 0.5rem', 
+                              textAlign: 'center',
+                              fontSize: '0.68rem',
+                              fontWeight: 800,
+                              color: '#581c87',
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis'
+                            }}>
+                              {examInfo.institutionName || 'Model School & College'}
+                              {examInfo.title && ` • ${examInfo.title}`}
                             </div>
                           </div>
 
@@ -465,33 +481,33 @@ export default function ResultPage() {
                             justifyContent: 'space-between', 
                             alignItems: 'center', 
                             padding: '0.35rem 0.55rem', 
-                            background: '#f0fdfa',
-                            borderBottom: '1px solid #ccfbf1'
+                            background: '#fdf4ff',
+                            borderBottom: '1px solid #f0abfc'
                           }}>
                             <div style={{ 
                               background: '#ffffff', 
-                              border: '1.5px solid #0d9488', 
+                              border: '1.5px solid #7e22ce', 
                               padding: '0.15rem 0.45rem', 
                               borderRadius: '4px',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '0.25rem'
                             }}>
-                              <span style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 600 }}>ROOM</span>
-                              <strong style={{ fontSize: '0.95rem', color: '#0f766e', fontWeight: 900 }}>{roomName}</strong>
+                              <span style={{ fontSize: '0.7rem', color: '#6b21a8', fontWeight: 700 }}>ROOM</span>
+                              <strong style={{ fontSize: '0.95rem', color: '#581c87', fontWeight: 900 }}>{roomName}</strong>
                             </div>
 
                             <div style={{ 
-                              background: '#0f766e', 
+                              background: '#6b21a8', 
                               color: '#ffffff', 
                               padding: '0.18rem 0.6rem', 
                               borderRadius: '4px',
                               display: 'flex',
                               alignItems: 'center',
                               gap: '0.3rem',
-                              boxShadow: '0 1px 2px rgba(15, 118, 110, 0.3)'
+                              boxShadow: '0 1px 3px rgba(107, 33, 168, 0.4)'
                             }}>
-                              <span style={{ fontSize: '0.72rem', color: '#ccfbf1', fontWeight: 700 }}>SEAT</span>
+                              <span style={{ fontSize: '0.72rem', color: '#f3e8ff', fontWeight: 700 }}>SEAT</span>
                               <strong style={{ fontSize: '1.05rem', color: '#ffffff', fontWeight: 900, letterSpacing: '0.5px' }}>
                                 {student.seatNumber || 'N/A'}
                               </strong>
@@ -499,16 +515,16 @@ export default function ResultPage() {
                           </div>
 
                           {/* 3. Student Profile Section */}
-                          <div style={{ padding: '0.5rem 0.65rem', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            {/* Student Name */}
-                            <div style={{ marginBottom: '0.55rem' }}>
-                              <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          <div style={{ padding: '0.45rem 0.6rem', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            {/* Candidate Name */}
+                            <div style={{ marginBottom: '0.5rem' }}>
+                              <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                 Candidate Name
                               </div>
                               <div style={{ 
-                                fontSize: '1.15rem', 
+                                fontSize: '1.12rem', 
                                 fontWeight: 900, 
-                                color: '#0f172a', 
+                                color: '#1e112a', 
                                 lineHeight: '1.2',
                                 marginTop: '0.1rem',
                                 wordBreak: 'break-word'
@@ -522,24 +538,24 @@ export default function ResultPage() {
                               display: 'grid', 
                               gridTemplateColumns: '1fr 1fr', 
                               gap: '0.5rem', 
-                              background: '#f8fafc', 
-                              padding: '0.45rem 0.55rem', 
+                              background: '#faf5ff', 
+                              padding: '0.4rem 0.55rem', 
                               borderRadius: '5px',
-                              border: '1px solid #e2e8f0'
+                              border: '1px solid #e9d5ff'
                             }}>
                               <div>
-                                <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                                <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase' }}>
                                   Class
                                 </div>
-                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f766e', marginTop: '0.1rem' }}>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#6b21a8', marginTop: '0.1rem' }}>
                                   {student.className}
                                 </div>
                               </div>
-                              <div style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '0.5rem' }}>
-                                <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                              <div style={{ borderLeft: '1.5px solid #d8b4fe', paddingLeft: '0.5rem' }}>
+                                <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#6b21a8', textTransform: 'uppercase' }}>
                                   Roll / ID
                                 </div>
-                                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', fontFamily: 'monospace', marginTop: '0.1rem' }}>
+                                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#1e112a', fontFamily: 'monospace', marginTop: '0.1rem' }}>
                                   {student.id}
                                 </div>
                               </div>
@@ -548,18 +564,18 @@ export default function ResultPage() {
 
                           {/* 4. Bottom Footer Strip */}
                           <div style={{ 
-                            background: '#f8fafc', 
+                            background: '#faf5ff', 
                             padding: '0.3rem 0.55rem', 
-                            borderTop: '1px dashed #cbd5e1', 
+                            borderTop: '1px dashed #d8b4fe', 
                             display: 'flex', 
                             justifyContent: 'space-between', 
                             alignItems: 'center',
                             fontSize: '0.65rem'
                           }}>
-                            <span style={{ fontWeight: 800, color: '#0f766e', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
-                              ★ Official Seat Slip
+                            <span style={{ fontWeight: 800, color: '#6b21a8', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                              ★ Official Desk Slip
                             </span>
-                            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                            <span style={{ color: '#8b5cf6', fontStyle: 'italic', fontWeight: 600 }}>
                               Keep on Desk
                             </span>
                           </div>
@@ -580,13 +596,12 @@ export default function ResultPage() {
       )}
 
       {/* ========================================================= */}
-      {/* 2. ADMIT CARDS GENERATION (প্রবেশপত্র তৈরি ও প্রিন্ট)        */}
+      {/* 2. ADMIT CARDS GENERATION (with Logo & Tagline)           */}
       {/* ========================================================= */}
       {activeTab === 'admit' && (
         <div id="printable-area">
           {roomNames.map((roomName) => {
             const roomStudents = assignments[roomName];
-            // 2 admit cards per page for comfortable, official size
             const chunks = chunk(roomStudents, 2);
 
             return chunks.map((admitPair, pIdx) => (
@@ -600,101 +615,114 @@ export default function ResultPage() {
                     <div 
                       key={student.id} 
                       style={{ 
-                        border: '2px solid #0f766e', 
-                        borderRadius: '0.5rem', 
-                        padding: '1.2rem', 
+                        border: '2px solid #6b21a8', 
+                        borderRadius: '0.6rem', 
+                        padding: '1.25rem', 
                         background: '#fff',
                         position: 'relative',
-                        boxShadow: '0 2px 8px rgba(13, 148, 136, 0.08)'
+                        boxShadow: '0 4px 12px rgba(107, 33, 168, 0.1)'
                       }}
                     >
-                      {/* Top Header */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #0f766e', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      {/* Top Header with BOTH Logo & Tagline */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #6b21a8', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '0.75rem' }}>
+                        {/* Main Logo */}
+                        <div style={{ background: '#ffffff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #d8b4fe', flexShrink: 0 }}>
                           <img 
-                            src={examInfo.customLogoUrl || "/logo/logo.png"} 
+                            src="/logo/logo.png" 
                             alt="Logo" 
-                            style={{ height: '42px', width: 'auto', maxWidth: '80px', objectFit: 'contain' }} 
+                            style={{ height: '40px', width: 'auto', maxWidth: '140px', objectFit: 'contain' }} 
                           />
-                          <div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f766e', margin: 0, textTransform: 'uppercase' }}>
-                              {examInfo.institutionName || 'Model School & College'}
-                            </h2>
-                            <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
-                              {examInfo.title || 'Examination Admit Card 2026'}
-                            </div>
+                        </div>
+
+                        {/* Center Institution Info */}
+                        <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                          <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#581c87', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px' }}>
+                            {examInfo.institutionName || 'Model School & College'}
+                          </h2>
+                          <div style={{ fontSize: '0.88rem', color: '#6b21a8', fontWeight: 700, marginTop: '0.15rem' }}>
+                            {examInfo.title || 'Examination Admit Card 2026'}
                           </div>
+                        </div>
+
+                        {/* Tagline Graphic */}
+                        <div style={{ background: '#ffffff', padding: '3px 8px', borderRadius: '6px', border: '1px solid #d8b4fe', flexShrink: 0 }}>
+                          <img 
+                            src="/logo/tagline_1.png" 
+                            alt="Tagline" 
+                            style={{ height: '45px', width: 'auto', maxWidth: '130px', objectFit: 'contain' }} 
+                          />
                         </div>
 
                         {/* Candidate Photo Box */}
                         <div style={{ 
-                          width: '78px', 
-                          height: '92px', 
-                          border: '1.5px dashed #0d9488', 
-                          borderRadius: '0.3rem', 
+                          width: '74px', 
+                          height: '88px', 
+                          border: '1.5px dashed #7e22ce', 
+                          borderRadius: '0.35rem', 
                           display: 'flex', 
                           flexDirection: 'column',
                           alignItems: 'center', 
                           justifyContent: 'center', 
                           textAlign: 'center',
-                          fontSize: '0.65rem',
-                          color: '#64748b',
-                          background: '#f0fdfa',
-                          padding: '0.2rem'
+                          fontSize: '0.62rem',
+                          color: '#6b21a8',
+                          background: '#faf5ff',
+                          padding: '0.2rem',
+                          flexShrink: 0
                         }}>
                           <span>Affix Passport Size Photo</span>
                         </div>
                       </div>
 
                       {/* Admit Card Badge */}
-                      <div style={{ textAlign: 'center', marginTop: '-1.5rem', marginBottom: '0.8rem' }}>
-                        <span style={{ background: '#0f766e', color: '#fff', padding: '0.2rem 1.2rem', borderRadius: '1rem', fontWeight: 800, fontSize: '0.85rem', letterSpacing: '0.5px' }}>
+                      <div style={{ textAlign: 'center', marginTop: '-1.6rem', marginBottom: '0.85rem' }}>
+                        <span style={{ background: '#6b21a8', color: '#fff', padding: '0.25rem 1.4rem', borderRadius: '1rem', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.5px', boxShadow: '0 2px 4px rgba(107,33,168,0.3)' }}>
                           ADMIT CARD / প্রবেশপত্র
                         </span>
                       </div>
 
                       {/* Student Details Grid */}
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.65rem', background: '#f0fdfa', padding: '0.85rem', borderRadius: '0.4rem', border: '1px solid #ccfbf1', marginBottom: '0.85rem', fontSize: '0.95rem' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.75rem', background: '#faf5ff', padding: '0.9rem', borderRadius: '0.5rem', border: '1px solid #e9d5ff', marginBottom: '0.9rem', fontSize: '0.95rem' }}>
                         <div>
-                          <span style={{ color: '#475569', fontSize: '0.85rem' }}>Student Name: </span>
-                          <strong style={{ color: '#0f172a' }}>{student.name}</strong>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Student Name: </span>
+                          <strong style={{ color: '#1e112a' }}>{student.name}</strong>
                         </div>
                         <div>
-                          <span style={{ color: '#475569', fontSize: '0.85rem' }}>Roll / ID: </span>
-                          <strong style={{ color: '#0f766e' }}>{student.id}</strong>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Roll / ID: </span>
+                          <strong style={{ color: '#6b21a8', fontFamily: 'monospace' }}>{student.id}</strong>
                         </div>
                         <div>
-                          <span style={{ color: '#475569', fontSize: '0.85rem' }}>Class: </span>
-                          <strong style={{ color: '#0f172a' }}>{student.className}</strong>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Class: </span>
+                          <strong style={{ color: '#1e112a' }}>{student.className}</strong>
                         </div>
                         <div>
-                          <span style={{ color: '#475569', fontSize: '0.85rem' }}>Subject: </span>
-                          <strong style={{ color: '#0f172a' }}>{examInfo.subject || 'All Subjects'}</strong>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Subject: </span>
+                          <strong style={{ color: '#1e112a' }}>{examInfo.subject || 'All Subjects'}</strong>
                         </div>
                         <div>
-                          <span style={{ color: '#475569', fontSize: '0.85rem' }}>Allotted Room: </span>
-                          <strong style={{ color: '#0f766e' }}>Room {roomName}</strong>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Allotted Room: </span>
+                          <strong style={{ color: '#6b21a8' }}>Room {roomName}</strong>
                         </div>
                         <div>
-                          <span style={{ color: '#475569', fontSize: '0.85rem' }}>Assigned Seat: </span>
-                          <strong style={{ color: '#0f766e' }}>{student.seatNumber || 'Seat 1'}</strong>
+                          <span style={{ color: '#64748b', fontSize: '0.85rem' }}>Assigned Seat: </span>
+                          <strong style={{ color: '#6b21a8', fontWeight: 800 }}>{student.seatNumber || 'Seat 1'}</strong>
                         </div>
                       </div>
 
                       {/* Instructions */}
                       <div style={{ fontSize: '0.75rem', color: '#475569', marginBottom: '1.5rem', lineHeight: '1.3' }}>
-                        <strong>পরীক্ষার্থীর নির্দেশনাবলী:</strong> {examInfo.instructions || '১. প্রবেশপত্র ছাড়া পরীক্ষা কক্ষে প্রবেশ নিষিদ্ধ। ২. পরীক্ষা শুরু হওয়ার ১৫ মিনিট পূর্বে হলে উপস্থিত হতে হবে।'}
+                        <strong>পরীক্ষার্থীর নির্দেশনাবলী:</strong> {examInfo.instructions || '১. প্রবেশপত্র ছাড়া পরীক্ষা কক্ষে প্রবেশ নিষেধ। ২. পরীক্ষা শুরু হওয়ার ১৫ মিনিট পূর্বে হলে উপস্থিত হতে হবে।'}
                       </div>
 
                       {/* Signatures */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '1rem', borderTop: '1px dashed #cbd5e1' }}>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ borderTop: '1px solid #334155', width: '150px', paddingTop: '0.2rem', fontSize: '0.8rem', fontWeight: 600 }}>
+                          <div style={{ borderTop: '1.5px solid #334155', width: '160px', paddingTop: '0.25rem', fontSize: '0.8rem', fontWeight: 700 }}>
                             Candidate Signature
                           </div>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <div style={{ borderTop: '1px solid #334155', width: '160px', paddingTop: '0.2rem', fontSize: '0.8rem', fontWeight: 700, color: '#0f766e' }}>
+                          <div style={{ borderTop: '1.5px solid #6b21a8', width: '170px', paddingTop: '0.25rem', fontSize: '0.8rem', fontWeight: 800, color: '#581c87' }}>
                             Headmaster / Principal
                           </div>
                         </div>
@@ -716,7 +744,7 @@ export default function ResultPage() {
           {/* Room Selector & Swap Notice Bar */}
           <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-hover)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <ArrowLeftRight size={22} color="var(--primary)" /> Room {selectedRoomName} - রো-কলাম লেআউট & ম্যানুয়াল সোয়াপ
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
@@ -755,7 +783,7 @@ export default function ResultPage() {
               justifyContent: 'space-between',
               alignItems: 'center',
               fontWeight: 700,
-              color: 'var(--primary-hover)',
+              color: 'var(--primary)',
               fontSize: '0.9rem'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -775,8 +803,8 @@ export default function ResultPage() {
           )}
 
           {/* Class Legend */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1.5rem', padding: '0.75rem', background: '#f0fdfa', borderRadius: '0.5rem', border: '1px solid #ccfbf1' }}>
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f766e', alignSelf: 'center' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1.5rem', padding: '0.75rem', background: 'var(--primary-tint)', borderRadius: '0.5rem', border: '1px solid var(--primary-border)' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)', alignSelf: 'center' }}>
               ক্লাস কালার কোড (Class Color Legend):
             </span>
             {distinctClasses.map(cls => {
@@ -791,7 +819,7 @@ export default function ResultPage() {
                     padding: '0.2rem 0.6rem', 
                     borderRadius: '0.3rem', 
                     fontSize: '0.8rem', 
-                    fontWeight: 700 
+                    fontWeight: 800 
                   }}
                 >
                   {cls}
@@ -803,7 +831,7 @@ export default function ResultPage() {
           {/* Teacher's Podium / Blackboard */}
           <div style={{ 
             textAlign: 'center', 
-            background: '#0f766e', 
+            background: 'linear-gradient(135deg, #4c1d95, #6b21a8)', 
             color: '#fff', 
             padding: '0.55rem', 
             borderRadius: '0.4rem', 
@@ -812,7 +840,7 @@ export default function ResultPage() {
             marginBottom: '1.5rem',
             width: '60%',
             margin: '0 auto 1.5rem auto',
-            boxShadow: '0 2px 6px rgba(15, 118, 110, 0.2)'
+            boxShadow: '0 2px 6px rgba(107, 33, 168, 0.25)'
           }}>
             🎓 BLACKBOARD / TEACHER&apos;S PODIUM (সামনের দিক)
           </div>
@@ -863,7 +891,7 @@ export default function ResultPage() {
                             flexDirection: 'column',
                             justifyContent: 'space-between',
                             minHeight: '115px',
-                            boxShadow: isSelectedForSwap ? '0 0 10px rgba(245, 158, 11, 0.5)' : student ? '0 2px 4px rgba(0,0,0,0.05)' : 'none',
+                            boxShadow: isSelectedForSwap ? '0 0 10px rgba(245, 158, 11, 0.5)' : student ? '0 2px 6px rgba(107,33,168,0.06)' : 'none',
                             position: 'relative',
                             cursor: student ? 'pointer' : 'default',
                             transform: isSelectedForSwap ? 'scale(1.02)' : 'none',
@@ -872,7 +900,7 @@ export default function ResultPage() {
                         >
                           {/* Seat identifier */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-hover)', background: 'var(--card-bg)', padding: '0.1rem 0.4rem', borderRadius: '0.2rem', border: '1px solid var(--primary-border)' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary)', background: 'var(--card-bg)', padding: '0.1rem 0.4rem', borderRadius: '0.2rem', border: '1px solid var(--primary-border)' }}>
                               {seatCode}
                             </span>
                             {student && (
@@ -900,7 +928,7 @@ export default function ResultPage() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.35rem', paddingTop: '0.25rem', borderTop: '1px dashed rgba(0,0,0,0.06)' }}>
                             <span style={{ fontSize: '0.65rem', color: '#64748b' }}>১ জন/বেঞ্চ</span>
                             {student && (
-                              <span style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 600 }}>
+                              <span style={{ fontSize: '0.65rem', color: 'var(--primary)', fontWeight: 700 }}>
                                 ⇄ সোয়াপ
                               </span>
                             )}
@@ -917,34 +945,47 @@ export default function ResultPage() {
       )}
 
       {/* ========================================================= */}
-      {/* 4. NOTICE BOARD SUMMARY (নোটিশ বোর্ড চার্ট)               */}
+      {/* 4. NOTICE BOARD SUMMARY (with Logo & Tagline)             */}
       {/* ========================================================= */}
       {activeTab === 'notice' && (
-        <div id="printable-area" style={{ background: '#fff', padding: '2rem', borderRadius: '0.5rem', border: '1.5px solid #0f766e' }}>
-          {/* Header */}
-          <div style={{ textAlign: 'center', borderBottom: '2.5px solid #0f766e', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
-            <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f766e', margin: 0, textTransform: 'uppercase' }}>
-              {examInfo.institutionName || 'Model School & College'}
-            </h1>
-            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#134e4a', marginTop: '0.25rem' }}>
-              EXAMINATION SEAT ALLOCATION NOTICE — {examInfo.title || 'Seat Plan'}
+        <div id="printable-area" style={{ background: '#fff', padding: '2rem', borderRadius: '0.5rem', border: '2px solid #6b21a8' }}>
+          {/* Header with BOTH Logo & Tagline */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #6b21a8', paddingBottom: '1rem', marginBottom: '1.5rem', gap: '1rem' }}>
+            {/* Logo */}
+            <div style={{ background: '#ffffff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #d8b4fe', flexShrink: 0 }}>
+              <img src="/logo/logo.png" alt="Logo" style={{ height: '42px', width: 'auto' }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '0.5rem', fontSize: '0.9rem', color: '#475569' }}>
-              {examInfo.subject && <span><strong>Subject:</strong> {examInfo.subject}</span>}
-              {examInfo.date && <span><strong>Date:</strong> {examInfo.date}</span>}
-              <span><strong>Seating Rule:</strong> ১ জন / বেঞ্চ (Single Seat Grid)</span>
+
+            {/* Title */}
+            <div style={{ textAlign: 'center', flexGrow: 1 }}>
+              <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#581c87', margin: 0, textTransform: 'uppercase' }}>
+                {examInfo.institutionName || 'Model School & College'}
+              </h1>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#6b21a8', marginTop: '0.25rem' }}>
+                EXAMINATION SEAT ALLOCATION NOTICE — {examInfo.title || 'Seat Plan'}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '0.4rem', fontSize: '0.85rem', color: '#475569' }}>
+                {examInfo.subject && <span><strong>Subject:</strong> {examInfo.subject}</span>}
+                {examInfo.date && <span><strong>Date:</strong> {examInfo.date}</span>}
+                <span><strong>Rule:</strong> ১ জন / বেঞ্চ (Single Seat Grid)</span>
+              </div>
+            </div>
+
+            {/* Tagline */}
+            <div style={{ background: '#ffffff', padding: '3px 8px', borderRadius: '6px', border: '1px solid #d8b4fe', flexShrink: 0 }}>
+              <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '45px', width: 'auto', maxWidth: '120px' }} />
             </div>
           </div>
 
           {/* Table */}
           <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000' }}>
             <thead>
-              <tr style={{ background: '#f0fdfa', borderBottom: '2px solid #0f766e' }}>
-                <th style={{ border: '1px solid #99f6e4', padding: '0.75rem', textAlign: 'center', color: '#0f766e' }}>রুম নম্বর</th>
-                <th style={{ border: '1px solid #99f6e4', padding: '0.75rem', textAlign: 'center', color: '#0f766e' }}>লেআউট (Row × Col)</th>
-                <th style={{ border: '1px solid #99f6e4', padding: '0.75rem', textAlign: 'left', color: '#0f766e' }}>অন্তর্ভুক্ত ক্লাসসমূহ</th>
-                <th style={{ border: '1px solid #99f6e4', padding: '0.75rem', textAlign: 'left', color: '#0f766e' }}>শিক্ষার্থী আইডি / রোল রেঞ্জ</th>
-                <th style={{ border: '1px solid #99f6e4', padding: '0.75rem', textAlign: 'center', color: '#0f766e' }}>মোট পরীক্ষার্থী</th>
+              <tr style={{ background: '#faf5ff', borderBottom: '2px solid #6b21a8' }}>
+                <th style={{ border: '1px solid #d8b4fe', padding: '0.75rem', textAlign: 'center', color: '#581c87' }}>রুম নম্বর</th>
+                <th style={{ border: '1px solid #d8b4fe', padding: '0.75rem', textAlign: 'center', color: '#581c87' }}>লেআউট (Row × Col)</th>
+                <th style={{ border: '1px solid #d8b4fe', padding: '0.75rem', textAlign: 'left', color: '#581c87' }}>অন্তর্ভুক্ত ক্লাসসমূহ</th>
+                <th style={{ border: '1px solid #d8b4fe', padding: '0.75rem', textAlign: 'left', color: '#581c87' }}>শিক্ষার্থী আইডি / রোল রেঞ্জ</th>
+                <th style={{ border: '1px solid #d8b4fe', padding: '0.75rem', textAlign: 'center', color: '#581c87' }}>মোট পরীক্ষার্থী</th>
               </tr>
             </thead>
             <tbody>
@@ -965,22 +1006,22 @@ export default function ResultPage() {
                 });
 
                 return (
-                  <tr key={roomName} style={{ borderBottom: '1px solid #ccfbf1' }}>
-                    <td style={{ border: '1px solid #ccfbf1', padding: '0.75rem', textAlign: 'center', fontWeight: 800, fontSize: '1.05rem', color: '#0f766e' }}>
+                  <tr key={roomName} style={{ borderBottom: '1px solid #e9d5ff' }}>
+                    <td style={{ border: '1px solid #e9d5ff', padding: '0.75rem', textAlign: 'center', fontWeight: 800, fontSize: '1.05rem', color: '#6b21a8' }}>
                       Room {roomName}
                     </td>
-                    <td style={{ border: '1px solid #ccfbf1', padding: '0.75rem', textAlign: 'center' }}>
+                    <td style={{ border: '1px solid #e9d5ff', padding: '0.75rem', textAlign: 'center' }}>
                       {roomObj?.rows || Math.ceil((roomObj?.capacity || 20) / 4)} × {roomObj?.cols || 4}
                     </td>
-                    <td style={{ border: '1px solid #ccfbf1', padding: '0.75rem' }}>
+                    <td style={{ border: '1px solid #e9d5ff', padding: '0.75rem' }}>
                       {Object.keys(classGroups).join(', ')}
                     </td>
-                    <td style={{ border: '1px solid #ccfbf1', padding: '0.75rem', fontSize: '0.85rem' }}>
+                    <td style={{ border: '1px solid #e9d5ff', padding: '0.75rem', fontSize: '0.85rem' }}>
                       {classSummaries.map((s, idx) => (
                         <div key={idx} style={{ marginBottom: '0.2rem' }}>{s}</div>
                       ))}
                     </td>
-                    <td style={{ border: '1px solid #ccfbf1', padding: '0.75rem', textAlign: 'center', fontWeight: 800, fontSize: '1rem', color: '#0f766e' }}>
+                    <td style={{ border: '1px solid #e9d5ff', padding: '0.75rem', textAlign: 'center', fontWeight: 800, fontSize: '1rem', color: '#6b21a8' }}>
                       {roomStudents.length} / {roomObj?.capacity || roomStudents.length}
                     </td>
                   </tr>
@@ -992,12 +1033,12 @@ export default function ResultPage() {
           {/* Footer Signatures */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4rem', padding: '0 2rem' }}>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ borderTop: '1px solid #000', width: '180px', paddingTop: '0.3rem', fontWeight: 700 }}>
+              <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.3rem', fontWeight: 700 }}>
                 পরীক্ষা নিয়ন্ত্রক
               </div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ borderTop: '1px solid #000', width: '180px', paddingTop: '0.3rem', fontWeight: 700 }}>
+              <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.3rem', fontWeight: 700 }}>
                 অধ্যক্ষ / প্রধান শিক্ষক
               </div>
             </div>
@@ -1006,7 +1047,7 @@ export default function ResultPage() {
       )}
 
       {/* ========================================================= */}
-      {/* 5. ATTENDANCE SHEET (হাজিরা শিট)                          */}
+      {/* 5. ATTENDANCE SHEET (with Logo & Tagline)                 */}
       {/* ========================================================= */}
       {activeTab === 'attendance' && (
         <div id="printable-area">
@@ -1017,49 +1058,64 @@ export default function ResultPage() {
               <div 
                 key={roomName} 
                 className={rIndex > 0 ? "print-page-break" : ""} 
-                style={{ background: '#fff', padding: '1.5rem', borderRadius: '0.5rem', border: '1.5px solid #0f766e', marginBottom: '2rem' }}
+                style={{ background: '#fff', padding: '1.5rem', borderRadius: '0.5rem', border: '2px solid #6b21a8', marginBottom: '2rem' }}
               >
-                <div style={{ textAlign: 'center', borderBottom: '2px solid #0f766e', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f766e', textTransform: 'uppercase' }}>
-                    {examInfo.institutionName || 'Model School & College'}
+                {/* Header with BOTH Logo & Tagline */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #6b21a8', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '1rem' }}>
+                  {/* Logo */}
+                  <div style={{ background: '#ffffff', padding: '3px 6px', borderRadius: '4px', border: '1px solid #d8b4fe', flexShrink: 0 }}>
+                    <img src="/logo/logo.png" alt="Logo" style={{ height: '36px', width: 'auto' }} />
                   </div>
-                  <h2 style={{ fontSize: '1.35rem', fontWeight: 800, margin: '0.2rem 0', color: '#000' }}>
-                    EXAM ATTENDANCE & SIGNATURE SHEET
-                  </h2>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#333' }}>
-                    {examInfo.title || 'Examination 2026'}
+
+                  {/* Center Text */}
+                  <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#581c87', textTransform: 'uppercase' }}>
+                      {examInfo.institutionName || 'Model School & College'}
+                    </div>
+                    <h2 style={{ fontSize: '1.3rem', fontWeight: 800, margin: '0.15rem 0', color: '#1e112a' }}>
+                      EXAM ATTENDANCE & SIGNATURE SHEET
+                    </h2>
+                    <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#6b21a8' }}>
+                      {examInfo.title || 'Examination 2026'}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.85rem', color: '#444' }}>
-                    <span><strong>Room:</strong> Room {roomName} ({roomStudents.length} Students)</span>
-                    {examInfo.subject && <span><strong>Subject:</strong> {examInfo.subject}</span>}
-                    {examInfo.date && <span><strong>Date:</strong> {examInfo.date}</span>}
+
+                  {/* Tagline */}
+                  <div style={{ background: '#ffffff', padding: '2px 6px', borderRadius: '4px', border: '1px solid #d8b4fe', flexShrink: 0 }}>
+                    <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '40px', width: 'auto', maxWidth: '110px' }} />
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.85rem', fontSize: '0.85rem', color: '#444' }}>
+                  <span><strong>Room:</strong> Room {roomName} ({roomStudents.length} Students)</span>
+                  {examInfo.subject && <span><strong>Subject:</strong> {examInfo.subject}</span>}
+                  {examInfo.date && <span><strong>Date:</strong> {examInfo.date}</span>}
                 </div>
 
                 <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.9rem' }}>
                   <thead>
-                    <tr style={{ background: '#f0fdfa', borderBottom: '2px solid #0f766e' }}>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', width: '50px', textAlign: 'center' }}>SL</th>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', width: '90px', textAlign: 'center' }}>Seat No</th>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', width: '100px', textAlign: 'center' }}>Roll / ID</th>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', textAlign: 'left' }}>Student Name</th>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', width: '100px', textAlign: 'center' }}>Class</th>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', width: '160px', textAlign: 'center' }}>Student Sign</th>
-                      <th style={{ border: '1px solid #99f6e4', padding: '0.5rem', width: '120px', textAlign: 'center' }}>Script / Khata No</th>
+                    <tr style={{ background: '#faf5ff', borderBottom: '2px solid #6b21a8' }}>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', width: '50px', textAlign: 'center', color: '#581c87' }}>SL</th>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', width: '90px', textAlign: 'center', color: '#581c87' }}>Seat No</th>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', width: '100px', textAlign: 'center', color: '#581c87' }}>Roll / ID</th>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', textAlign: 'left', color: '#581c87' }}>Student Name</th>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', width: '100px', textAlign: 'center', color: '#581c87' }}>Class</th>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', width: '160px', textAlign: 'center', color: '#581c87' }}>Student Sign</th>
+                      <th style={{ border: '1px solid #d8b4fe', padding: '0.5rem', width: '120px', textAlign: 'center', color: '#581c87' }}>Script / Khata No</th>
                     </tr>
                   </thead>
                   <tbody>
                     {roomStudents.map((student, idx) => (
-                      <tr key={student.id} style={{ height: '38px', borderBottom: '1px solid #ccfbf1' }}>
-                        <td style={{ border: '1px solid #99f6e4', textAlign: 'center' }}>{idx + 1}</td>
-                        <td style={{ border: '1px solid #99f6e4', textAlign: 'center', fontWeight: 800, color: '#0f766e' }}>
+                      <tr key={student.id} style={{ height: '38px', borderBottom: '1px solid #e9d5ff' }}>
+                        <td style={{ border: '1px solid #d8b4fe', textAlign: 'center' }}>{idx + 1}</td>
+                        <td style={{ border: '1px solid #d8b4fe', textAlign: 'center', fontWeight: 800, color: '#6b21a8' }}>
                           {student.seatNumber || `Seat ${idx + 1}`}
                         </td>
-                        <td style={{ border: '1px solid #99f6e4', textAlign: 'center', fontWeight: 700 }}>{student.id}</td>
-                        <td style={{ border: '1px solid #99f6e4', paddingLeft: '0.5rem' }}>{student.name}</td>
-                        <td style={{ border: '1px solid #99f6e4', textAlign: 'center' }}>{student.className}</td>
-                        <td style={{ border: '1px solid #99f6e4' }}></td>
-                        <td style={{ border: '1px solid #99f6e4' }}></td>
+                        <td style={{ border: '1px solid #d8b4fe', textAlign: 'center', fontWeight: 700 }}>{student.id}</td>
+                        <td style={{ border: '1px solid #d8b4fe', paddingLeft: '0.5rem' }}>{student.name}</td>
+                        <td style={{ border: '1px solid #d8b4fe', textAlign: 'center' }}>{student.className}</td>
+                        <td style={{ border: '1px solid #d8b4fe' }}></td>
+                        <td style={{ border: '1px solid #d8b4fe' }}></td>
                       </tr>
                     ))}
                   </tbody>
@@ -1067,12 +1123,12 @@ export default function ResultPage() {
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3.5rem', padding: '0 1rem' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ borderTop: '1px solid #000', width: '200px', paddingTop: '0.3rem', fontSize: '0.85rem', fontWeight: 700 }}>
+                    <div style={{ borderTop: '1.5px solid #000', width: '200px', paddingTop: '0.3rem', fontSize: '0.85rem', fontWeight: 700 }}>
                       Invigilator 1 Signature
                     </div>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ borderTop: '1px solid #000', width: '200px', paddingTop: '0.3rem', fontSize: '0.85rem', fontWeight: 700 }}>
+                    <div style={{ borderTop: '1.5px solid #000', width: '200px', paddingTop: '0.3rem', fontSize: '0.85rem', fontWeight: 700 }}>
                       Invigilator 2 Signature
                     </div>
                   </div>

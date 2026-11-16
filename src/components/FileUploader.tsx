@@ -59,7 +59,7 @@ export default function FileUploader() {
 
   return (
     <div className="glass-card">
-      <h2 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-hover)', fontSize: '1.3rem' }}>
+      <h2 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontSize: '1.3rem' }}>
         <FileSpreadsheet size={24} color="var(--primary)" /> Upload Students Data
       </h2>
       

@@ -45,10 +45,10 @@ export default function RoomManager() {
   return (
     <div className="glass-card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, color: 'var(--primary-hover)', fontSize: '1.3rem' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, color: 'var(--primary)', fontSize: '1.3rem' }}>
           <DoorOpen size={24} color="var(--primary)" /> Rooms & Bench Layout
         </h2>
-        <span style={{ fontSize: '0.8rem', background: 'var(--primary-tint)', color: 'var(--primary-hover)', padding: '0.25rem 0.65rem', borderRadius: '1rem', fontWeight: 700, border: '1px solid var(--primary-border)' }}>
+        <span style={{ fontSize: '0.8rem', background: 'var(--primary-tint)', color: 'var(--primary)', padding: '0.25rem 0.65rem', borderRadius: '1rem', fontWeight: 700, border: '1px solid var(--primary-border)' }}>
           {rooms.length} {rooms.length === 1 ? 'Room' : 'Rooms'}
         </span>
       </div>
@@ -104,7 +104,7 @@ export default function RoomManager() {
               বেঞ্চ প্রতি ধারণক্ষমতা
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontWeight: 800, color: 'var(--primary-hover)', fontSize: '0.95rem' }}>
+              <span style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '0.95rem' }}>
                 ১ জন / বেঞ্চ (Single Seat)
               </span>
             </div>
@@ -189,7 +189,7 @@ export default function RoomManager() {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary-hover)' }}>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--primary)' }}>
                   Room {room.name}
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -210,12 +210,12 @@ export default function RoomManager() {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.4rem', borderTop: '1px dashed var(--primary-border)', fontSize: '0.8rem' }}>
               <span style={{ color: 'var(--text-muted)' }}>
-                ক্যাপাসিটি: <strong style={{ color: 'var(--primary-hover)' }}>{room.capacity}</strong> সিট
+                ক্যাপাসিটি: <strong style={{ color: 'var(--primary)' }}>{room.capacity}</strong> সিট
               </span>
               <span style={{ 
                 fontSize: '0.72rem', 
                 background: 'var(--primary-tint)', 
-                color: 'var(--primary-hover)', 
+                color: 'var(--primary)', 
                 padding: '0.15rem 0.5rem', 
                 borderRadius: '0.25rem',
                 border: '1px solid var(--primary-border)',
