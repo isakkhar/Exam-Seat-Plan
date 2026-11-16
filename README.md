@@ -1,21 +1,44 @@
-# Exam Seat Plan Maker
+# Exam Seat Plan & Admit Card Maker
 
-A professional, web-based tool built with **Next.js** to generate and print exam seat plans. This application allows you to manage rooms, upload student lists via Excel/CSV, and automatically generates print-ready seat slips in a 3x3 grid layout (9 slips per A4 page).
+A modern, institutional web-based application built with **Next.js 16** to plan, manage, generate, and print exam seat arrangements and official admit cards. Designed with a clean, professional **Deep Purple theme**, this tool is ideal for schools, colleges, and examination centers.
 
-## Features
+---
 
-- **Automated Seating**: Intelligently mixes students from different classes so that no two students from the same class sit side-by-side.
-- **Bulk Upload**: Import student data easily via `.csv` or `.xlsx` files.
-- **Room Management**: Add, remove, and manage rooms with specific seat capacities.
-- **Print-Ready Layout**: Generates a 3x3 grid of seat slips per page, perfectly sized for A4 paper.
-- **Custom Branding**: Includes your organization's logo and tagline on every seat slip.
-- **Professional Design**: Modern, clean UI with glassmorphism effects and optimized print styles.
+## ✨ Features
 
-## Getting Started
+- **Classroom Bench Grid (১ জন / বেঞ্চ)**:
+  - Configure rooms with **Rows** and **Columns** (bench layout).
+  - Single-student-per-bench rule with automatically computed capacity and distinct seat codes (`R1-C1`, `R1-C2`...).
+- **Room-wise Class Mapping**:
+  - Assign specific classes to specific rooms or choose **"All Classes"**.
+- **Anti-Cheating Seating Patterns**:
+  - Choose between **Snake / Zig-zag order**, **Column-wise**, or **Row-wise** distribution to ensure students of the same class never sit side-by-side.
+- **Interactive Manual Seat Swap**:
+  - In the Visual Classroom Map, click any two desks to immediately swap student seat positions.
+- **5 Print-Ready A4 Document Views**:
+  1. **Seat Slips (3x3 Grid)**: 9 desk sticker slips per A4 page with student info, institution logo, room, and seat code.
+  2. **Admit Cards (প্রবেশপত্র)**: Official printable admit cards with candidate photo placeholder, rules, student details, and signature zones.
+  3. **Visual Classroom Map**: Classroom diagram with podium/blackboard and color-coded class badges.
+  4. **Notice Board Summary**: Clean summary table for the examination notice board with roll ranges and class breakdown.
+  5. **Attendance & Signature Sheet**: Invigilator attendance sheet with student signature and answer script number columns.
+- **Real-Time Student Search**:
+  - Instant live filter by Roll/ID, student name, or class.
+- **Excel Export (.xlsx)**:
+  - One-click full seat allocation export in Excel format.
+- **Institutional Branding**:
+  - Set custom institution name and upload your own school/college logo directly from the browser.
+- **Smart Column Detection**:
+  - Upload CSV or Excel files with flexible header names (e.g. `Roll`, `ID`, `Student Name`, `Class`, `Grade`).
+- **Capacity Alerts**:
+  - Visual indicator warning of seat shortages or reporting surplus empty seats.
+
+---
+
+## 🚀 Getting Started
 
 ### 1. Installation
 
-First, clone the repository and install the dependencies:
+Clone the repository and install dependencies:
 
 ```bash
 npm install
@@ -23,42 +46,41 @@ npm install
 
 ### 2. Running Locally
 
-Start the development server:
+Start the Next.js development server:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 3. Usage Guide
+---
 
-1.  **Manage Rooms**: On the dashboard, add your rooms and specify the number of seats available in each.
-2.  **Upload Data**: Upload your student list. The file should be a `.csv` or `.xlsx` file.
-    -   **Required Columns**: `ID`, `Name`, `Class`. (Case-insensitive)
-3.  **Generate**: Click "Generate Seat Plan". The system will distribute students across rooms based on your rules.
-4.  **Print**: Go to the result page and click "Print All Slips".
-    -   **Note**: In the print dialog, Ensure **Layout** is set to **Portrait** and **Margins** are set to **None** or **Default** for the best result.
+## 📋 Quick Usage Guide
 
-## Data Format Example
+1. **Setup Institution & Exam**: Enter institution name, exam title, subject, and date on the dashboard. Optionally upload your institution logo.
+2. **Configure Rooms**: Add exam halls by specifying room name, number of rows, and columns (1 student per bench). Select allowed classes for each room.
+3. **Upload Student List**: Upload your student list via `.xlsx` or `.csv` (Columns: `Roll/ID, Name, Class`).
+4. **Choose Seating Pattern**: Select Snake/Zig-zag order, Column-wise, or Row-wise.
+5. **Generate**: Click **"Generate Seat Plan & Admit Cards"**.
+6. **Print & Export**:
+   - Switch between **Seat Slips**, **Admit Cards**, **Classroom Map**, **Notice Board**, or **Attendance Sheet**.
+   - Click **"Print Current View"** (Recommended print settings: Layout = **Portrait**, Margins = **None / Default**).
+   - Click **"Export Excel"** for a complete spreadsheet.
 
-See the provided `sample_students.csv` for reference. It should look like this:
+---
 
-| ID | Name | Class |
-| :--- | :--- | :--- |
-| 1001 | John Doe | 9 |
-| 1002 | Jane Smith | 10 |
-| ... | ... | ... |
+## 🛠️ Tech Stack
 
-## Technologies Used
-
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Styling**: Vanilla CSS + CSS Modules
+- **Styling**: Modern Teal CSS Theme with Glassmorphism
 - **Icons**: Lucide React
-- **Data Parsing**: XLSX
-- **Persistence**: LocalStorage (Data stays even after refresh)
+- **Data Parsing & Export**: XLSX
+- **Persistence**: LocalStorage
 
-## License
+---
+
+## 📄 License
 
 MIT
