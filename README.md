@@ -1,6 +1,6 @@
 # Exam Seat Plan & Admit Card Maker
 
-A modern, institutional web-based application built with **Next.js 16** to plan, manage, generate, and print exam seat arrangements and official admit cards. Designed with a clean, professional **Teal theme**, this tool is ideal for schools, colleges, and examination centers.
+A modern, institutional web-based application built with **Next.js 16** to plan, manage, generate, and print exam seat arrangements and official admit cards. Designed with a clean, professional **Deep Purple theme**, this tool is ideal for schools, colleges, and examination centers.
 
 ---
 
