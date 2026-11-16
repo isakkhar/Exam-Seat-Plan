@@ -291,7 +291,7 @@ export default function ResultPage() {
 
       {/* Search Results Preview Card */}
       {searchQuery.trim() && (
-        <div className="no-print glass-card" style={{ marginBottom: '1.5rem', border: '2px solid var(--primary)', background: '#fff' }}>
+        <div className="no-print glass-card" style={{ marginBottom: '1.5rem', border: '2px solid var(--primary)', background: 'var(--card-bg)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <h4 style={{ margin: 0, color: 'var(--primary-hover)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Search size={18} /> সার্চ ফলাফল ({searchResults.length} জন পাওয়া গেছে)
@@ -624,14 +624,14 @@ export default function ResultPage() {
       {/* 3. VISUAL ROOM BENCH LAYOUT & SEAT SWAP                   */}
       {/* ========================================================= */}
       {activeTab === 'visual' && (
-        <div id="printable-area" className="glass-card" style={{ padding: '1.5rem', background: '#fff' }}>
+        <div id="printable-area" className="glass-card" style={{ padding: '1.5rem', background: 'var(--card-bg)' }}>
           {/* Room Selector & Swap Notice Bar */}
           <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--primary-hover)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <ArrowLeftRight size={22} color="var(--primary)" /> Room {selectedRoomName} - রো-কলাম লেআউট & ম্যানুয়াল সোয়াপ
               </h2>
-              <p style={{ color: '#64748b', fontSize: '0.85rem', marginTop: '0.2rem' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.2rem' }}>
                 বেঞ্চ প্রতি ১ জন পরীক্ষার্থী। <strong>সিট সোয়াপ করতে:</strong> যেকোনো শিক্ষার্থীর সিটে ক্লিক করুন, তারপর অন্য সিটে ক্লিক করলে তাদের সিট স্বয়ংক্রিয়ভাবে অদলবদল হয়ে যাবে।
               </p>
             </div>
@@ -640,7 +640,7 @@ export default function ResultPage() {
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>রুম সিলেক্ট করুন:</span>
               <select
                 className="input"
-                style={{ width: 'auto', padding: '0.4rem 0.8rem', background: '#fff', color: '#000' }}
+                style={{ width: 'auto', padding: '0.4rem 0.8rem' }}
                 value={selectedRoomName}
                 onChange={e => {
                   setSelectedRoomName(e.target.value);
@@ -767,8 +767,8 @@ export default function ResultPage() {
                               ? '3px solid #f59e0b' 
                               : student 
                               ? `2px solid ${colStyle?.border}` 
-                              : '1.5px dashed #cbd5e1',
-                            background: isSelectedForSwap ? '#fef3c7' : student ? colStyle?.bg : '#f8fafc',
+                              : '1.5px dashed var(--primary-border)',
+                            background: isSelectedForSwap ? '#fef3c7' : student ? colStyle?.bg : 'var(--glass-bg)',
                             borderRadius: '0.5rem',
                             padding: '0.85rem',
                             display: 'flex',
@@ -784,7 +784,7 @@ export default function ResultPage() {
                         >
                           {/* Seat identifier */}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0f766e', background: '#ffffff', padding: '0.1rem 0.4rem', borderRadius: '0.2rem', border: '1px solid #ccfbf1' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--primary-hover)', background: 'var(--card-bg)', padding: '0.1rem 0.4rem', borderRadius: '0.2rem', border: '1px solid var(--primary-border)' }}>
                               {seatCode}
                             </span>
                             {student && (

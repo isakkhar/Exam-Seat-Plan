@@ -156,7 +156,7 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'center', paddingTop: '1rem', borderTop: '1px dashed var(--primary-border)' }}>
           {/* Logo Uploader */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '56px', height: '56px', border: '1px solid var(--primary-border)', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', overflow: 'hidden', flexShrink: 0 }}>
+            <div style={{ width: '56px', height: '56px', border: '1px solid var(--primary-border)', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--card-bg)', overflow: 'hidden', flexShrink: 0 }}>
               {examInfo.customLogoUrl ? (
                 <img src={examInfo.customLogoUrl} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
               ) : (
@@ -191,8 +191,8 @@ export default function Dashboard() {
                   borderRadius: '0.4rem',
                   fontSize: '0.78rem',
                   fontWeight: 700,
-                  border: seatingPattern === 'snake' ? '2px solid var(--primary)' : '1px solid var(--card-border)',
-                  background: seatingPattern === 'snake' ? 'var(--primary-tint)' : '#fff',
+                  border: seatingPattern === 'snake' ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
+                  background: seatingPattern === 'snake' ? 'var(--primary-tint)' : 'var(--btn-unselected-bg)',
                   color: seatingPattern === 'snake' ? 'var(--primary-hover)' : 'var(--foreground)',
                   cursor: 'pointer'
                 }}
@@ -209,8 +209,8 @@ export default function Dashboard() {
                   borderRadius: '0.4rem',
                   fontSize: '0.78rem',
                   fontWeight: 700,
-                  border: seatingPattern === 'column-wise' ? '2px solid var(--primary)' : '1px solid var(--card-border)',
-                  background: seatingPattern === 'column-wise' ? 'var(--primary-tint)' : '#fff',
+                  border: seatingPattern === 'column-wise' ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
+                  background: seatingPattern === 'column-wise' ? 'var(--primary-tint)' : 'var(--btn-unselected-bg)',
                   color: seatingPattern === 'column-wise' ? 'var(--primary-hover)' : 'var(--foreground)',
                   cursor: 'pointer'
                 }}
@@ -227,8 +227,8 @@ export default function Dashboard() {
                   borderRadius: '0.4rem',
                   fontSize: '0.78rem',
                   fontWeight: 700,
-                  border: seatingPattern === 'row-wise' ? '2px solid var(--primary)' : '1px solid var(--card-border)',
-                  background: seatingPattern === 'row-wise' ? 'var(--primary-tint)' : '#fff',
+                  border: seatingPattern === 'row-wise' ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
+                  background: seatingPattern === 'row-wise' ? 'var(--primary-tint)' : 'var(--btn-unselected-bg)',
                   color: seatingPattern === 'row-wise' ? 'var(--primary-hover)' : 'var(--foreground)',
                   cursor: 'pointer'
                 }}

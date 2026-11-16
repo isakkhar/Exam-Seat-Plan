@@ -180,7 +180,7 @@ export default function RoomManager() {
           <div key={room.id} style={{ 
             padding: '0.85rem', 
             borderRadius: '0.5rem', 
-            background: '#ffffff', 
+            background: 'var(--card-bg)', 
             border: '1px solid var(--primary-border)',
             display: 'flex',
             flexDirection: 'column',
