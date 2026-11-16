@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useSeatPlan, AllocatedStudent, Room } from '@/context/SeatPlanContext';
+import * as XLSX from 'xlsx';
 import { 
   Printer, 
   ChevronLeft, 
@@ -12,7 +13,10 @@ import {
   Calendar, 
   MapPin, 
   BookOpen,
-  Users
+  Users,
+  Download,
+  Search,
+  X
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -36,6 +40,7 @@ export default function ResultPage() {
   const [selectedRoomName, setSelectedRoomName] = useState<string>(
     Object.keys(assignments)[0] || ''
   );
+  const [searchQuery, setSearchQuery] = useState('');
 
   const roomNames = Object.keys(assignments);
 
@@ -66,7 +71,7 @@ export default function ResultPage() {
     return result;
   };
 
-  // Class color mapper
+  // Distinct classes
   const distinctClasses = Array.from(
     new Set(
       Object.values(assignments)
@@ -83,20 +88,60 @@ export default function ResultPage() {
 
   const currentRoomObj = rooms.find(r => r.name === selectedRoomName) || rooms[0];
 
+  // Search results
+  const searchResults = searchQuery.trim()
+    ? Object.entries(assignments).flatMap(([roomName, students]) =>
+        students
+          .filter(s =>
+            s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            s.className.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+          .map(s => ({ ...s, roomName }))
+      )
+    : [];
+
+  // Export to Excel (.xlsx)
+  const handleExportExcel = () => {
+    const exportData = Object.entries(assignments).flatMap(([roomName, students]) =>
+      students.map((s, idx) => ({
+        'Serial': idx + 1,
+        'Room': `Room ${roomName}`,
+        'Seat Code': s.seatNumber || `Seat ${idx + 1}`,
+        'Row': s.row || '-',
+        'Column': s.col || '-',
+        'Roll / ID': s.id,
+        'Student Name': s.name,
+        'Class': s.className,
+        'Exam Title': examInfo.title || '',
+        'Subject': examInfo.subject || '',
+        'Date': examInfo.date || ''
+      }))
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Exam Seat Plan');
+    XLSX.writeFile(
+      workbook, 
+      `Seat_Plan_${examInfo.title ? examInfo.title.replace(/[^a-zA-Z0-9]/g, '_') : 'Exam'}.xlsx`
+    );
+  };
+
   return (
     <main className="container">
       {/* Top action bar - Hidden when printing */}
-      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <Link href="/" className="button" style={{ background: 'transparent', border: '1px solid var(--primary)', color: 'var(--primary)' }}>
           <ChevronLeft size={20} /> Dashboard
         </Link>
 
         {/* View Mode Tabs */}
-        <div style={{ display: 'flex', background: 'var(--card-bg)', padding: '0.3rem', borderRadius: '0.6rem', border: '1px solid var(--card-border)', gap: '0.3rem' }}>
+        <div style={{ display: 'flex', background: 'var(--card-bg)', padding: '0.25rem', borderRadius: '0.6rem', border: '1px solid var(--card-border)', gap: '0.25rem', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveTab('slips')}
             style={{
-              padding: '0.5rem 0.9rem',
+              padding: '0.5rem 0.85rem',
               borderRadius: '0.4rem',
               border: 'none',
               background: activeTab === 'slips' ? 'var(--primary)' : 'transparent',
@@ -115,7 +160,7 @@ export default function ResultPage() {
           <button
             onClick={() => setActiveTab('visual')}
             style={{
-              padding: '0.5rem 0.9rem',
+              padding: '0.5rem 0.85rem',
               borderRadius: '0.4rem',
               border: 'none',
               background: activeTab === 'visual' ? 'var(--primary)' : 'transparent',
@@ -134,7 +179,7 @@ export default function ResultPage() {
           <button
             onClick={() => setActiveTab('notice')}
             style={{
-              padding: '0.5rem 0.9rem',
+              padding: '0.5rem 0.85rem',
               borderRadius: '0.4rem',
               border: 'none',
               background: activeTab === 'notice' ? 'var(--primary)' : 'transparent',
@@ -153,7 +198,7 @@ export default function ResultPage() {
           <button
             onClick={() => setActiveTab('attendance')}
             style={{
-              padding: '0.5rem 0.9rem',
+              padding: '0.5rem 0.85rem',
               borderRadius: '0.4rem',
               border: 'none',
               background: activeTab === 'attendance' ? 'var(--primary)' : 'transparent',
@@ -170,10 +215,94 @@ export default function ResultPage() {
           </button>
         </div>
 
-        <button onClick={handlePrint} className="button" style={{ background: '#10b981' }}>
-          <Printer size={20} /> Print Current View
-        </button>
+        {/* Export & Print Buttons */}
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button onClick={handleExportExcel} className="button button-secondary" style={{ background: '#0284c7' }}>
+            <Download size={18} /> Export Excel
+          </button>
+          <button onClick={handlePrint} className="button" style={{ background: '#10b981' }}>
+            <Printer size={18} /> Print View
+          </button>
+        </div>
       </div>
+
+      {/* Real-time Student Search Bar (Hidden when printing) */}
+      <div className="no-print glass-card" style={{ padding: '0.85rem 1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <Search size={18} color="var(--primary)" />
+        <input
+          className="input"
+          style={{ border: 'none', background: 'transparent', padding: '0.25rem', fontSize: '0.95rem' }}
+          placeholder="রোল, শিক্ষার্থী নাম অথবা ক্লাস দিয়ে সিট খুঁজুন (Search Student / Roll)..."
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button 
+            onClick={() => setSearchQuery('')}
+            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
+          >
+            <X size={18} />
+          </button>
+        )}
+      </div>
+
+      {/* Search Results Preview Modal/Card */}
+      {searchQuery.trim() && (
+        <div className="no-print glass-card" style={{ marginBottom: '1.5rem', border: '2px solid var(--primary)', background: '#fff' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h4 style={{ margin: 0, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Search size={18} /> সার্চ ফলাফল ({searchResults.length} জন পাওয়া গেছে)
+            </h4>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+              রুমের নামের উপর ক্লিক করলে ঐ রুমে নিয়ে যাবে
+            </span>
+          </div>
+
+          {searchResults.length === 0 ? (
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', padding: '0.5rem 0' }}>
+              কোন শিক্ষার্থী পাওয়া যায়নি।
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '0.75rem', maxHeight: '220px', overflowY: 'auto' }}>
+              {searchResults.map((st) => (
+                <div 
+                  key={`${st.id}-${st.roomName}`}
+                  onClick={() => {
+                    setSelectedRoomName(st.roomName);
+                    setActiveTab('visual');
+                  }}
+                  style={{
+                    padding: '0.65rem 0.85rem',
+                    borderRadius: '0.4rem',
+                    border: '1px solid #e2e8f0',
+                    background: '#f8fafc',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>{st.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#475569' }}>
+                      Roll: <strong>{st.id}</strong> • Class: {st.className}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ background: 'var(--primary)', color: '#fff', fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontWeight: 700 }}>
+                      Room {st.roomName}
+                    </span>
+                    <div style={{ fontSize: '0.75rem', color: '#059669', fontWeight: 700, marginTop: '0.2rem' }}>
+                      {st.seatNumber || 'Seat 1'}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* 1. SEAT SLIPS (3x3 Grid Layout)                           */}
@@ -315,7 +444,7 @@ export default function ResultPage() {
       {/* 2. VISUAL ROOM BENCH LAYOUT (রুমের রো-কলাম ভিউ)           */}
       {/* ========================================================= */}
       {activeTab === 'visual' && (
-        <div className="glass-card" style={{ padding: '1.5rem', background: '#fff' }}>
+        <div id="printable-area" className="glass-card" style={{ padding: '1.5rem', background: '#fff' }}>
           {/* Room Selector Filter */}
           <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
@@ -567,7 +696,6 @@ export default function ResultPage() {
         <div id="printable-area">
           {roomNames.map((roomName, rIndex) => {
             const roomStudents = assignments[roomName] || [];
-            const roomObj = rooms.find(r => r.name === roomName);
 
             return (
               <div 
