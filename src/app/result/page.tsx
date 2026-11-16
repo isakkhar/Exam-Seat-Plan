@@ -373,7 +373,7 @@ export default function ResultPage() {
                     gridTemplateColumns: 'repeat(3, 1fr)', 
                     gridTemplateRows: 'repeat(3, 1fr)',
                     gap: '0', 
-                    border: '1.5px solid #0f766e',
+                    border: '1.5px dashed #94a3b8',
                     width: '100%',
                     maxWidth: '210mm',
                     minHeight: '27.7cm',
@@ -381,99 +381,183 @@ export default function ResultPage() {
                   }}>
                     {seatChunk.map((student) => (
                       <div key={student.id} style={{ 
-                        border: '1.2px solid #0f766e', 
-                        padding: '0.65rem', 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        justifyContent: 'space-between',
-                        position: 'relative',
+                        border: '1px dashed #cbd5e1', 
+                        padding: '0.25rem', 
                         height: '9.2cm', 
-                        backgroundColor: 'white',
+                        backgroundColor: '#ffffff',
                         boxSizing: 'border-box'
                       }}>
-                        {/* Header with Institution & Logo */}
-                        <div>
+                        {/* Inner Premium Card Frame */}
+                        <div style={{
+                          border: '2px solid #0f766e',
+                          borderRadius: '6px',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          overflow: 'hidden',
+                          backgroundColor: '#ffffff',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+                        }}>
+                          {/* 1. Header with Institution Branding */}
                           <div style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
+                            background: 'linear-gradient(135deg, #0f766e 0%, #0d9488 100%)', 
+                            padding: '0.45rem 0.55rem',
+                            color: '#ffffff',
+                            display: 'flex',
                             alignItems: 'center',
-                            marginBottom: '0.35rem',
-                            width: '100%',
-                            padding: '0 2px'
+                            gap: '0.5rem',
+                            borderBottom: '2px solid #134e4a'
                           }}>
-                            <div style={{ flexShrink: 0 }}>
+                            <div style={{ 
+                              background: '#ffffff', 
+                              borderRadius: '4px', 
+                              padding: '2px', 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'center',
+                              flexShrink: 0,
+                              width: '32px',
+                              height: '32px'
+                            }}>
                               <img 
                                 src={examInfo.customLogoUrl || "/logo/logo.png"} 
                                 alt="Logo" 
-                                style={{ height: '28px', width: 'auto', maxWidth: '70px', objectFit: 'contain' }} 
+                                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
                               />
                             </div>
-                            <div style={{ flexGrow: 1, textAlign: 'right', paddingLeft: '0.5rem' }}>
-                              <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f766e', textTransform: 'uppercase', lineHeight: '1.1' }}>
+                            <div style={{ flexGrow: 1, overflow: 'hidden' }}>
+                              <div style={{ 
+                                fontSize: '0.78rem', 
+                                fontWeight: 900, 
+                                textTransform: 'uppercase', 
+                                letterSpacing: '0.3px', 
+                                whiteSpace: 'nowrap', 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis',
+                                color: '#ffffff',
+                                lineHeight: '1.15'
+                              }}>
                                 {examInfo.institutionName || 'Model School & College'}
+                              </div>
+                              <div style={{ 
+                                fontSize: '0.66rem', 
+                                color: '#ccfbf1', 
+                                fontWeight: 700, 
+                                marginTop: '0.1rem',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis'
+                              }}>
+                                {examInfo.title || 'Examination 2026'}
+                                {examInfo.subject && ` • ${examInfo.subject}`}
                               </div>
                             </div>
                           </div>
 
-                          {/* Exam Title */}
-                          {examInfo.title && (
+                          {/* 2. Prominent Room & Seat Highlight Ribbon */}
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            padding: '0.35rem 0.55rem', 
+                            background: '#f0fdfa',
+                            borderBottom: '1px solid #ccfbf1'
+                          }}>
                             <div style={{ 
-                              textAlign: 'center', 
-                              fontSize: '0.76rem', 
-                              fontWeight: 700, 
-                              color: '#134e4a', 
-                              borderBottom: '1px solid #ccfbf1', 
-                              background: '#f0fdfa',
-                              padding: '0.2rem',
-                              borderRadius: '0.2rem',
-                              marginBottom: '0.4rem'
+                              background: '#ffffff', 
+                              border: '1.5px solid #0d9488', 
+                              padding: '0.15rem 0.45rem', 
+                              borderRadius: '4px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.25rem'
                             }}>
-                              {examInfo.title}
-                              {examInfo.subject && ` • ${examInfo.subject}`}
+                              <span style={{ fontSize: '0.7rem', color: '#475569', fontWeight: 600 }}>ROOM</span>
+                              <strong style={{ fontSize: '0.95rem', color: '#0f766e', fontWeight: 900 }}>{roomName}</strong>
                             </div>
-                          )}
-                        </div>
-                        
-                        {/* Student & Seat Details */}
-                        <div style={{ 
-                          display: 'flex', 
-                          flexDirection: 'column', 
-                          gap: '0.35rem',
-                          textAlign: 'left',
-                          paddingLeft: '0.6rem',
-                          borderLeft: '3px solid #0d9488'
-                        }}>
-                          <div style={{ fontSize: '1.05rem', color: '#000', lineHeight: '1.2' }}>
-                            <span style={{ fontWeight: '400', color: '#555', fontSize: '0.85rem' }}>Name: </span>
-                            <strong style={{ fontWeight: '800' }}>{student.name}</strong>
-                          </div>
-                          <div style={{ fontSize: '1.05rem', color: '#000' }}>
-                            <span style={{ fontWeight: '400', color: '#555', fontSize: '0.85rem' }}>Class: </span>
-                            <strong style={{ fontWeight: '800' }}>{student.className}</strong>
-                          </div>
-                          <div style={{ fontSize: '1.05rem', color: '#000' }}>
-                            <span style={{ fontWeight: '400', color: '#555', fontSize: '0.85rem' }}>Roll / ID: </span>
-                            <strong style={{ fontWeight: '800' }}>{student.id}</strong>
-                          </div>
-                        </div>
 
-                        {/* Room & Seat Footer Badge */}
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          alignItems: 'center',
-                          marginTop: '0.4rem',
-                          paddingTop: '0.35rem',
-                          borderTop: '1px dashed #0d9488',
-                          fontSize: '0.85rem'
-                        }}>
-                          <div>
-                            <span style={{ color: '#475569' }}>Room: </span>
-                            <strong style={{ fontSize: '0.95rem', color: '#0f766e' }}>{roomName}</strong>
+                            <div style={{ 
+                              background: '#0f766e', 
+                              color: '#ffffff', 
+                              padding: '0.18rem 0.6rem', 
+                              borderRadius: '4px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              boxShadow: '0 1px 2px rgba(15, 118, 110, 0.3)'
+                            }}>
+                              <span style={{ fontSize: '0.72rem', color: '#ccfbf1', fontWeight: 700 }}>SEAT</span>
+                              <strong style={{ fontSize: '1.05rem', color: '#ffffff', fontWeight: 900, letterSpacing: '0.5px' }}>
+                                {student.seatNumber || 'N/A'}
+                              </strong>
+                            </div>
                           </div>
-                          <div style={{ background: '#f0fdfa', padding: '0.15rem 0.5rem', borderRadius: '0.25rem', border: '1px solid #99f6e4' }}>
-                            <span style={{ color: '#0f766e' }}>Seat: </span>
-                            <strong style={{ color: '#115e59', fontWeight: 800 }}>{student.seatNumber || 'N/A'}</strong>
+
+                          {/* 3. Student Profile Section */}
+                          <div style={{ padding: '0.5rem 0.65rem', flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            {/* Student Name */}
+                            <div style={{ marginBottom: '0.55rem' }}>
+                              <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Candidate Name
+                              </div>
+                              <div style={{ 
+                                fontSize: '1.15rem', 
+                                fontWeight: 900, 
+                                color: '#0f172a', 
+                                lineHeight: '1.2',
+                                marginTop: '0.1rem',
+                                wordBreak: 'break-word'
+                              }}>
+                                {student.name}
+                              </div>
+                            </div>
+
+                            {/* Class & Roll Grid */}
+                            <div style={{ 
+                              display: 'grid', 
+                              gridTemplateColumns: '1fr 1fr', 
+                              gap: '0.5rem', 
+                              background: '#f8fafc', 
+                              padding: '0.45rem 0.55rem', 
+                              borderRadius: '5px',
+                              border: '1px solid #e2e8f0'
+                            }}>
+                              <div>
+                                <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                                  Class
+                                </div>
+                                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0f766e', marginTop: '0.1rem' }}>
+                                  {student.className}
+                                </div>
+                              </div>
+                              <div style={{ borderLeft: '1px solid #cbd5e1', paddingLeft: '0.5rem' }}>
+                                <div style={{ fontSize: '0.64rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase' }}>
+                                  Roll / ID
+                                </div>
+                                <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#0f172a', fontFamily: 'monospace', marginTop: '0.1rem' }}>
+                                  {student.id}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 4. Bottom Footer Strip */}
+                          <div style={{ 
+                            background: '#f8fafc', 
+                            padding: '0.3rem 0.55rem', 
+                            borderTop: '1px dashed #cbd5e1', 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            fontSize: '0.65rem'
+                          }}>
+                            <span style={{ fontWeight: 800, color: '#0f766e', letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+                              ★ Official Seat Slip
+                            </span>
+                            <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>
+                              Keep on Desk
+                            </span>
                           </div>
                         </div>
                       </div>
