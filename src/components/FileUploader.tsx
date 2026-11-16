@@ -59,7 +59,7 @@ export default function FileUploader() {
 
   return (
     <div className="glass-card">
-      <h2 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <h2 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-hover)', fontSize: '1.3rem' }}>
         <FileSpreadsheet size={24} color="var(--primary)" /> Upload Students Data
       </h2>
       
@@ -69,16 +69,16 @@ export default function FileUploader() {
 
       <div style={{ 
         position: 'relative', 
-        height: '110px', 
-        border: '2px dashed var(--glass-border)', 
+        height: '120px', 
+        border: '2px dashed var(--primary-light)', 
         borderRadius: '0.5rem', 
         display: 'flex', 
         flexDirection: 'column',
         alignItems: 'center', 
         justifyContent: 'center', 
         cursor: 'pointer',
-        background: 'var(--glass-bg)',
-        transition: 'border-color 0.2s ease'
+        background: 'var(--primary-tint)',
+        transition: 'all 0.2s ease'
       }}>
         <input 
           type="file" 
@@ -88,9 +88,9 @@ export default function FileUploader() {
         />
         <div style={{ width: '100%', textAlign: 'center', color: 'var(--text-muted)', padding: '0.5rem' }}>
           {parsedCount !== null ? (
-            <div style={{ color: '#10b981', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
-              <CheckCircle size={28} />
-              <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+            <div style={{ color: 'var(--primary-hover)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem' }}>
+              <CheckCircle size={32} color="var(--primary)" />
+              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>
                 {uploadedFileName} ({parsedCount} জন শিক্ষার্থী লোড হয়েছে)
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -99,11 +99,11 @@ export default function FileUploader() {
             </div>
           ) : (
             <>
-              <Upload size={30} style={{ display: 'block', margin: '0 auto 0.4rem', color: 'var(--primary)' }} />
-              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--foreground)' }}>
+              <Upload size={32} style={{ display: 'block', margin: '0 auto 0.4rem', color: 'var(--primary)' }} />
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--primary-hover)' }}>
                 Click or Drag file to upload
               </div>
-              <div style={{ fontSize: '0.75rem' }}>.xlsx, .xls or .csv</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Excel (.xlsx, .xls) অথবা CSV (.csv)</div>
             </>
           )}
         </div>

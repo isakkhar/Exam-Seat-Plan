@@ -30,18 +30,25 @@ export interface ExamInfo {
   date: string;
   subject: string;
   institutionName: string;
+  customLogoUrl?: string;
+  instructions?: string;
 }
+
+export type SeatingPattern = 'column-wise' | 'snake' | 'row-wise';
 
 interface SeatPlanContextType {
   rooms: Room[];
   students: Student[];
-  assignments: Record<string, AllocatedStudent[]>; // Room Name -> Students with seat info
+  assignments: Record<string, AllocatedStudent[]>;
   examInfo: ExamInfo;
+  seatingPattern: SeatingPattern;
   availableClasses: string[];
   addRoom: (room: Room) => void;
   removeRoom: (id: string) => void;
   setStudents: (students: Student[]) => void;
   setExamInfo: React.Dispatch<React.SetStateAction<ExamInfo>>;
+  setSeatingPattern: (pattern: SeatingPattern) => void;
+  swapSeats: (roomName: string, studentId1: string, studentId2: string) => void;
   generatePlan: () => void;
   clearAll: () => void;
 }
@@ -52,11 +59,14 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<Record<string, AllocatedStudent[]>>({});
+  const [seatingPattern, setSeatingPattern] = useState<SeatingPattern>('snake');
   const [examInfo, setExamInfo] = useState<ExamInfo>({
     title: 'Final Examination 2026',
     date: '',
     subject: '',
-    institutionName: '',
+    institutionName: 'Ideal Model School & College',
+    customLogoUrl: '',
+    instructions: '১. প্রবেশপত্র ছাড়া পরীক্ষা কক্ষে প্রবেশ নিষেধ। ২. মোবাইল ফোন বা ইলেকট্রনিক ডিভাইস সম্পূর্ণ নিষিদ্ধ।'
   });
 
   // Load from localStorage
@@ -65,6 +75,8 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     const savedStudents = localStorage.getItem('seatplan_students');
     const savedAssignments = localStorage.getItem('seatplan_assignments');
     const savedExamInfo = localStorage.getItem('seatplan_exam_info');
+    const savedPattern = localStorage.getItem('seatplan_pattern');
+
     if (savedRooms) {
       try { setRooms(JSON.parse(savedRooms)); } catch (e) { console.error(e); }
     }
@@ -77,6 +89,9 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     if (savedExamInfo) {
       try { setExamInfo(JSON.parse(savedExamInfo)); } catch (e) { console.error(e); }
     }
+    if (savedPattern && (savedPattern === 'column-wise' || savedPattern === 'snake' || savedPattern === 'row-wise')) {
+      setSeatingPattern(savedPattern as SeatingPattern);
+    }
   }, []);
 
   // Save to localStorage
@@ -85,7 +100,8 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('seatplan_students', JSON.stringify(students));
     localStorage.setItem('seatplan_assignments', JSON.stringify(assignments));
     localStorage.setItem('seatplan_exam_info', JSON.stringify(examInfo));
-  }, [rooms, students, assignments, examInfo]);
+    localStorage.setItem('seatplan_pattern', seatingPattern);
+  }, [rooms, students, assignments, examInfo, seatingPattern]);
 
   // Distinct classes from uploaded students
   const availableClasses = Array.from(new Set(students.map(s => s.className.trim()))).filter(Boolean);
@@ -102,6 +118,49 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('seatplan_assignments');
   };
 
+  // Manual seat swapping function
+  const swapSeats = (roomName: string, studentId1: string, studentId2: string) => {
+    setAssignments(prev => {
+      const roomStudents = prev[roomName];
+      if (!roomStudents) return prev;
+
+      const idx1 = roomStudents.findIndex(s => s.id === studentId1);
+      const idx2 = roomStudents.findIndex(s => s.id === studentId2);
+      if (idx1 === -1 || idx2 === -1) return prev;
+
+      const updated = [...roomStudents];
+      const s1 = updated[idx1];
+      const s2 = updated[idx2];
+
+      // Swap seat metadata
+      const tempSeatNo = s1.seatNumber;
+      const tempRow = s1.row;
+      const tempCol = s1.col;
+      const tempBench = s1.benchSeatIndex;
+
+      updated[idx1] = {
+        ...s1,
+        seatNumber: s2.seatNumber,
+        row: s2.row,
+        col: s2.col,
+        benchSeatIndex: s2.benchSeatIndex
+      };
+
+      updated[idx2] = {
+        ...s2,
+        seatNumber: tempSeatNo,
+        row: tempRow,
+        col: tempCol,
+        benchSeatIndex: tempBench
+      };
+
+      return {
+        ...prev,
+        [roomName]: updated
+      };
+    });
+  };
+
   const generatePlan = () => {
     if (rooms.length === 0 || students.length === 0) return;
 
@@ -115,47 +174,66 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
 
     const newAssignments: Record<string, AllocatedStudent[]> = {};
 
-    // Helper to generate seat labels based on rows, cols, seatsPerBench
+    // Helper to generate seat slots according to the selected seating pattern
     const generateSeatSlots = (room: Room) => {
       const rows = room.rows && room.rows > 0 ? room.rows : Math.ceil(room.capacity / 4);
       const cols = room.cols && room.cols > 0 ? room.cols : 4;
-      const seatsPerBench = room.seatsPerBench && room.seatsPerBench > 0 ? room.seatsPerBench : 1;
-      
       const slots: { seatNumber: string; row: number; col: number; benchSeatIndex: number }[] = [];
-      let count = 0;
-      for (let r = 1; r <= rows; r++) {
+
+      if (seatingPattern === 'column-wise') {
+        // Fill column by column downwards: (R1-C1 -> R2-C1 ... then R1-C2)
         for (let c = 1; c <= cols; c++) {
-          for (let b = 1; b <= seatsPerBench; b++) {
-            if (count >= room.capacity) break;
-            const seatNumber = seatsPerBench > 1 
-              ? `R${r}-C${c} (S${b})` 
-              : `R${r}-C${c}`;
-            slots.push({ seatNumber, row: r, col: c, benchSeatIndex: b });
-            count++;
+          for (let r = 1; r <= rows; r++) {
+            if (slots.length >= room.capacity) break;
+            slots.push({ seatNumber: `R${r}-C${c}`, row: r, col: c, benchSeatIndex: 1 });
           }
-          if (count >= room.capacity) break;
+          if (slots.length >= room.capacity) break;
         }
-        if (count >= room.capacity) break;
+      } else if (seatingPattern === 'snake') {
+        // Snake / Zig-zag order: Col 1 down, Col 2 up, Col 3 down...
+        for (let c = 1; c <= cols; c++) {
+          const isEvenCol = c % 2 === 0;
+          if (isEvenCol) {
+            // Go upwards
+            for (let r = rows; r >= 1; r--) {
+              if (slots.length >= room.capacity) break;
+              slots.push({ seatNumber: `R${r}-C${c}`, row: r, col: c, benchSeatIndex: 1 });
+            }
+          } else {
+            // Go downwards
+            for (let r = 1; r <= rows; r++) {
+              if (slots.length >= room.capacity) break;
+              slots.push({ seatNumber: `R${r}-C${c}`, row: r, col: c, benchSeatIndex: 1 });
+            }
+          }
+          if (slots.length >= room.capacity) break;
+        }
+      } else {
+        // Row-wise: Fill row by row across (R1-C1 -> R1-C2 ... then R2-C1)
+        for (let r = 1; r <= rows; r++) {
+          for (let c = 1; c <= cols; c++) {
+            if (slots.length >= room.capacity) break;
+            slots.push({ seatNumber: `R${r}-C${c}`, row: r, col: c, benchSeatIndex: 1 });
+          }
+          if (slots.length >= room.capacity) break;
+        }
       }
+
       return slots;
     };
 
     // Assign students to each room
     for (const room of rooms) {
-      // Determine which classes are allowed for this room
       const allowed = room.allowedClasses && room.allowedClasses.length > 0
         ? room.allowedClasses
         : Object.keys(poolByClass);
 
-      // Collect available candidate classes for this room that have students left
       const eligibleClasses = allowed.filter(cls => poolByClass[cls] && poolByClass[cls].length > 0);
-
       const slots = generateSeatSlots(room);
       const roomAssigned: AllocatedStudent[] = [];
 
       let classIndex = 0;
       for (let i = 0; i < slots.length; i++) {
-        // Find next eligible class with available students
         let foundStudent: Student | null = null;
         let attempts = 0;
         const totalEligible = eligibleClasses.length;
@@ -191,7 +269,6 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
             benchSeatIndex: slot.benchSeatIndex,
           });
         } else {
-          // No more students available for this room
           break;
         }
       }
@@ -208,11 +285,14 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
       students, 
       assignments, 
       examInfo,
+      seatingPattern,
       availableClasses,
       addRoom, 
       removeRoom, 
       setStudents, 
       setExamInfo,
+      setSeatingPattern,
+      swapSeats,
       generatePlan, 
       clearAll 
     }}>
