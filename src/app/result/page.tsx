@@ -43,6 +43,22 @@ const CLASS_COLORS: Record<string, { bg: string; border: string; text: string; b
   'Engineering': { bg: '#fef2f2', border: '#ef4444', text: '#b91c1c', badge: '#fee2e2' },
 };
 
+const CLASS_DISPLAY_NAMES: Record<string, string> = {
+  'Class 1': 'Class 1 (ক্লাস ১)',
+  'Class 2': 'Class 2 (ক্লাস ২)',
+  'Class 3': 'Class 3 (ক্লাস ৩)',
+  'Class 4': 'Class 4 (ক্লাস ৪)',
+  'Class 5': 'Class 5 (ক্লাস ৫)',
+  'Class 6': 'Class 6 (ক্লাস ৬)',
+  'Class 7': 'Class 7 (ক্লাস ৭)',
+  'Class 8': 'Class 8 (ক্লাস ৮)',
+  'Class 9/10': 'Class 9/10 (৯ম-১০ম)',
+  'Class 11/12': 'Class 11/12 (১১শ-১২শ)',
+  'Polytechnic': 'Polytechnic (পলিটেকনিক)',
+  'Non-Engineering': 'Non-Engineering (নন-ইঞ্জিনিয়ারিং)',
+  'Engineering': 'Engineering (ইঞ্জিনিয়ারিং)'
+};
+
 const DEFAULT_COLOR = { bg: '#f8fafc', border: '#004b99', text: '#004b99', badge: '#e0f2fe' };
 
 export default function ResultPage() {
@@ -2349,14 +2365,14 @@ export default function ResultPage() {
                 {/* Results Table (Group A: 21 rows) */}
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem', fontFamily: "'Hind Siliguri', 'Inter', sans-serif" }}>
                   <thead>
-                    <tr style={{ background: '#004b99', color: '#ffffff', textAlign: 'center' }}>
+                    <tr style={{ background: '#004b99', color: '#00000', textAlign: 'center' }}>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '9%' }}>ক্যাটাগরি</th>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '14%' }}>অফিশিয়াল অবস্থান</th>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '15%' }}>রোল / আইডি</th>
                       <th style={{ padding: '0.35rem 0.45rem', border: '1px solid #003366', textAlign: 'left', width: '28%' }}>বিজয়ীর নাম ও শিক্ষাপ্রতিষ্ঠান</th>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%' }}>লিখিত (/৩০)</th>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%' }}>ভাইভা (/৪০)</th>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%', background: '#003366' }}>মোট (/৭০)</th>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%' }}>লিখিত</th>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%' }}>ভাইভা</th>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%', background: '#003366' }}>মোট</th>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '13%' }}>পুরস্কার ও পদক</th>
                     </tr>
                   </thead>
@@ -2375,8 +2391,8 @@ export default function ResultPage() {
 
                         return (
                           <tr key={`${className}-${posIndex}`} style={{ background: rowBg, height: '31px' }}>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.2rem' }}>
-                              {posIndex === 0 ? className : ''}
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.2rem', color: '#004b99' }}>
+                              {CLASS_DISPLAY_NAMES[className] || className}
                             </td>
                             <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.2rem' }}>
                               <span style={{ display: 'inline-block', background: badgeBg, color: badgeText, padding: '0.12rem 0.4rem', borderRadius: '0.25rem', fontWeight: 800, fontSize: '0.68rem' }}>
@@ -2437,9 +2453,9 @@ export default function ResultPage() {
                     </div>
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', fontSize: '0.62rem', color: '#64748b', marginTop: '0.5rem' }}>
+                {/* <div style={{ textAlign: 'center', fontSize: '0.62rem', color: '#64748b', marginTop: '0.5rem' }}>
                   ICT Olympiad Bangladesh Season 3 Gala Grand Finale • Official Awards Gazette • Verified by National Examination Committee
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -2483,9 +2499,9 @@ export default function ResultPage() {
                       <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '14%' }}>অফিশিয়াল অবস্থান</th>
                       <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '15%' }}>রোল / আইডি</th>
                       <th style={{ padding: '0.38rem 0.45rem', border: '1px solid #003366', textAlign: 'left', width: '27%' }}>বিজয়ীর নাম ও শিক্ষাপ্রতিষ্ঠান</th>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%' }}>লিখিত (/৩০)</th>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%' }}>ভাইভা (/৪০)</th>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%', background: '#003366' }}>মোট (/৭০)</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%' }}>লিখিত</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%' }}>ভাইভা</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%', background: '#003366' }}>মোট</th>
                       <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '12%' }}>পুরস্কার ও পদক</th>
                     </tr>
                   </thead>
@@ -2504,8 +2520,8 @@ export default function ResultPage() {
 
                         return (
                           <tr key={`${className}-${posIndex}`} style={{ background: rowBg, height: '36px' }}>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.24rem' }}>
-                              {posIndex === 0 ? className : ''}
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.24rem', color: '#004b99' }}>
+                              {CLASS_DISPLAY_NAMES[className] || className}
                             </td>
                             <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.24rem' }}>
                               <span style={{ display: 'inline-block', background: badgeBg, color: badgeText, padding: '0.14rem 0.4rem', borderRadius: '0.25rem', fontWeight: 800, fontSize: '0.68rem' }}>
@@ -2566,9 +2582,9 @@ export default function ResultPage() {
                     </div>
                   </div>
                 </div>
-                <div style={{ textAlign: 'center', fontSize: '0.62rem', color: '#64748b', marginTop: '0.5rem' }}>
+                {/* <div style={{ textAlign: 'center', fontSize: '0.62rem', color: '#64748b', marginTop: '0.5rem' }}>
                   ICT Olympiad Bangladesh Season 3 Gala Grand Finale • Official Awards Gazette • Verified by National Examination Committee
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
