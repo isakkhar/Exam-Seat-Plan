@@ -105,7 +105,8 @@ export default function ResultPage() {
     ? allAllocatedStudents.filter(s =>
         s.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.className.toLowerCase().includes(searchQuery.toLowerCase())
+        s.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.institution && s.institution.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : [];
 
@@ -133,6 +134,8 @@ export default function ResultPage() {
       'Candidate ID': s.id,
       'Candidate Name': s.name,
       'Category / Class': s.className,
+      'Institution / School': s.institution || 'N/A',
+      'Gala Rank': s.rank || 'N/A',
       'Exam Group': s.group || 'Group A',
       'Written Hall': s.writtenRoom || 'Room 101',
       'Written Seat': s.writtenSeat || s.seatNumber,
@@ -338,7 +341,9 @@ export default function ResultPage() {
                   <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0.85rem', borderBottom: '1px solid var(--card-border)', fontSize: '0.85rem' }}>
                     <div>
                       <strong style={{ color: 'var(--primary)' }}>{s.name}</strong> ({s.className})
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Roll: {s.id} | {s.group}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                        Roll: {s.id} | {s.group} {s.institution ? `• ${s.institution}` : ''}
+                      </div>
                     </div>
                     <div style={{ textAlign: 'right', fontSize: '0.78rem' }}>
                       <span style={{ color: 'var(--primary)', fontWeight: 700 }}>লিখিত: {s.writtenRoom} ({s.writtenSeat})</span><br />
@@ -451,25 +456,37 @@ export default function ResultPage() {
                           {/* Candidate Identity */}
                           <div style={{ 
                             background: '#f4f8fc', 
-                            padding: '0.5rem 0.6rem', 
+                            padding: '0.45rem 0.55rem', 
                             borderRadius: '0.35rem', 
                             border: '1px solid #bfdbfe',
-                            marginBottom: '0.4rem'
+                            marginBottom: '0.35rem'
                           }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#004b99', background: '#dbeafe', padding: '0.1rem 0.35rem', borderRadius: '0.2rem' }}>
+                              <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#004b99', background: '#dbeafe', padding: '0.1rem 0.35rem', borderRadius: '0.2rem' }}>
                                 {student.group || 'Group A'}
                               </span>
                               <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#004b99', fontFamily: 'monospace' }}>
                                 {student.id}
                               </span>
                             </div>
-                            <div style={{ fontSize: '1rem', fontWeight: 900, color: '#0b1a30', margin: '0.2rem 0', lineHeight: '1.2' }}>
+                            <div style={{ fontSize: '0.92rem', fontWeight: 900, color: '#0b1a30', margin: '0.15rem 0', lineHeight: '1.2' }}>
                               {student.name}
                             </div>
-                            <div style={{ fontSize: '0.78rem', fontWeight: 800, color: colStyle.text }}>
-                              Category: {student.className}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem' }}>
+                              <span style={{ fontWeight: 800, color: colStyle.text }}>
+                                {student.className}
+                              </span>
+                              {student.rank && (
+                                <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700 }}>
+                                  Rank: #{student.rank}
+                                </span>
+                              )}
                             </div>
+                            {student.institution && (
+                              <div style={{ fontSize: '0.68rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '0.12rem' }}>
+                                🏫 {student.institution}
+                              </div>
+                            )}
                           </div>
 
                           {/* Parallel Exam Schedules */}
@@ -654,7 +671,7 @@ export default function ResultPage() {
                         }}>
                           <div style={{ gridColumn: 'span 2' }}>
                             <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Candidate Full Name:</span>
-                            <strong style={{ color: '#0b1a30', fontSize: '1rem' }}>{student.name}</strong>
+                            <strong style={{ color: '#0b1a30', fontSize: '1.05rem' }}>{student.name}</strong>
                           </div>
                           <div>
                             <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Candidate ID / Roll:</span>
@@ -667,10 +684,15 @@ export default function ResultPage() {
                           <div style={{ gridColumn: 'span 2' }}>
                             <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Category / Class:</span>
                             <span style={{ color: colStyle.text, fontWeight: 800 }}>{student.className}</span>
+                            {student.rank && (
+                              <span style={{ marginLeft: '0.5rem', background: '#dbeafe', color: '#004b99', fontSize: '0.72rem', padding: '0.1rem 0.45rem', borderRadius: '0.25rem', fontWeight: 700 }}>
+                                Gala Rank: #{student.rank}
+                              </span>
+                            )}
                           </div>
                           <div style={{ gridColumn: 'span 2' }}>
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Evaluation Track:</span>
-                            <strong style={{ color: '#0b1a30' }}>ICT Olympiad Season 3 Gala Final</strong>
+                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Institution / School:</span>
+                            <strong style={{ color: '#0b1a30', fontSize: '0.88rem' }}>{student.institution || 'ICT Olympiad Bangladesh'}</strong>
                           </div>
                         </div>
 
@@ -913,12 +935,17 @@ export default function ResultPage() {
 
                           {student ? (
                             <div>
-                              <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#0b1a30', lineHeight: '1.2', marginBottom: '0.2rem' }}>
+                              <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#0b1a30', lineHeight: '1.2', marginBottom: '0.2rem' }}>
                                 {student.name}
                               </div>
-                              <div style={{ fontSize: '0.75rem', color: '#475569' }}>
+                              <div style={{ fontSize: '0.72rem', color: '#475569' }}>
                                 Roll: <strong>{student.id}</strong> ({student.group})
                               </div>
+                              {student.institution && (
+                                <div style={{ fontSize: '0.68rem', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: '0.15rem' }}>
+                                  🏫 {student.institution}
+                                </div>
+                              )}
                             </div>
                           ) : (
                             <div style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', margin: 'auto' }}>
@@ -1117,14 +1144,15 @@ export default function ResultPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.82rem' }}>
                   <thead>
                     <tr style={{ background: '#eff6ff', borderBottom: '2px solid #004b99' }}>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '40px', textAlign: 'center', color: '#004b99' }}>SL</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>Seat No</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '35px', textAlign: 'center', color: '#004b99' }}>SL</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '80px', textAlign: 'center', color: '#004b99' }}>Seat No</th>
                       <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '90px', textAlign: 'center', color: '#004b99' }}>Roll / ID</th>
                       <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>Student Name</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '90px', textAlign: 'center', color: '#004b99' }}>Class</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#004b99' }}>Group</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '140px', textAlign: 'center', color: '#004b99' }}>Student Signature</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '100px', textAlign: 'center', color: '#004b99' }}>Script / Khata No</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>Class</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>Institution / School</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '65px', textAlign: 'center', color: '#004b99' }}>Group</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '120px', textAlign: 'center', color: '#004b99' }}>Student Signature</th>
+                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>Script No</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1135,8 +1163,11 @@ export default function ResultPage() {
                           {student.writtenSeat || student.seatNumber}
                         </td>
                         <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700 }}>{student.id}</td>
-                        <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem' }}>{student.name}</td>
+                        <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontWeight: 600 }}>{student.name}</td>
                         <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>{student.className}</td>
+                        <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontSize: '0.74rem', color: '#334155' }}>
+                          {student.institution || '—'}
+                        </td>
                         <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700 }}>{student.group}</td>
                         <td style={{ border: '1px solid #bfdbfe' }}></td>
                         <td style={{ border: '1px solid #bfdbfe' }}></td>
@@ -1216,7 +1247,14 @@ export default function ResultPage() {
                           #{student.vivaToken}
                         </td>
                         <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 700 }}>{student.id}</td>
-                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem' }}>{student.name}</td>
+                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem' }}>
+                          <div style={{ fontWeight: 700 }}>{student.name}</div>
+                          {student.institution && (
+                            <div style={{ fontSize: '0.68rem', color: '#7c2d12', marginTop: '0.1rem' }}>
+                              {student.institution}
+                            </div>
+                          )}
+                        </td>
                         <td style={{ border: '1px solid #fed7aa', textAlign: 'center' }}>{student.className}</td>
                         <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontSize: '0.72rem' }}>
                           {student.group === 'Group B' ? 'Slot 1' : 'Slot 2'}

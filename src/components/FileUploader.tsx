@@ -33,6 +33,8 @@ export default function FileUploader() {
         let idIndex = headerRow.findIndex(h => h === 'id' || h.includes('roll') || h.includes('student id') || h.includes('id no'));
         let nameIndex = headerRow.findIndex(h => h.includes('name') || h === 'student');
         let classIndex = headerRow.findIndex(h => h.includes('class') || h.includes('grade') || h.includes('sec'));
+        let instIndex = headerRow.findIndex(h => h.includes('institution') || h.includes('school') || h.includes('college') || h.includes('campus') || h.includes('varsity') || h.includes('uni'));
+        let rankIndex = headerRow.findIndex(h => h.includes('rank') || h.includes('position') || h.includes('pos'));
 
         // Fallback to 0, 1, 2 if headers not found
         if (idIndex === -1) idIndex = 0;
@@ -44,7 +46,9 @@ export default function FileUploader() {
           .map(row => ({
             id: String(row[idIndex] ?? '').trim(),
             name: String(row[nameIndex] ?? 'Student').trim(),
-            className: String(row[classIndex] ?? 'General').trim()
+            className: String(row[classIndex] ?? 'General').trim(),
+            institution: instIndex !== -1 && row[instIndex] ? String(row[instIndex]).trim() : undefined,
+            rank: rankIndex !== -1 && row[rankIndex] ? String(row[rankIndex]).trim() : undefined,
           }))
           .filter(s => s.id.length > 0);
 

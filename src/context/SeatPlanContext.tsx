@@ -1,11 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { OFFICIAL_GALA_STUDENTS } from '@/data/galaStudents';
 
 export interface Student {
   id: string;
   name: string;
   className: string;
+  institution?: string;
+  rank?: string;
 }
 
 export interface AllocatedStudent extends Student {
@@ -82,13 +85,12 @@ export const GROUP_B_CLASSES = [
   'Engineering'
 ];
 
-const SAMPLE_NAMES = [
-  'Tanvir Ahmed', 'Nafis Iqbal', 'Samiul Bashar', 'Sadia Rahman', 'Sumaiya Akter',
-  'Fahim Hossain', 'Abrar Fahad', 'Tahsin Habib', 'Anika Tabassum', 'Zarin Tasnim',
-  'Mehedi Hasan', 'Rifat Chowdhury', 'Nabila Islam', 'Arifur Rahman', 'Shamim Osman',
-  'Tanjim Mahmud', 'Kazi Mushfiq', 'Sabbir Hossain', 'Farhan Labib', 'Israt Jahan',
-  'Mahir Faisal', 'Shahriar Kabir', 'Adnan Sami', 'Tasnim Anika', 'Rashedul Islam',
-  'Jubayer Hossain', 'Nahid Parvez', 'Fariha Haque', 'Munim Shahriar', 'Shafiqul Islam'
+export const DEFAULT_GALA_ROOMS: Room[] = [
+  { id: 'room-101', name: '101', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'written' },
+  { id: 'room-102', name: '102', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'written' },
+  { id: 'room-103', name: '103', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'viva', vivaBoards: ['Board 1', 'Board 2'] },
+  { id: 'room-104', name: '104', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'viva', vivaBoards: ['Board 3', 'Board 4'] },
+  { id: 'room-105', name: '105', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'viva', vivaBoards: ['Board 5'] },
 ];
 
 interface SeatPlanContextType {
@@ -104,7 +106,7 @@ interface SeatPlanContextType {
   setExamInfo: React.Dispatch<React.SetStateAction<ExamInfo>>;
   setSeatingPattern: (pattern: SeatingPattern) => void;
   swapSeats: (roomName: string, studentId1: string, studentId2: string) => void;
-  generatePlan: () => void;
+  generatePlan: (overrideRooms?: Room[], overrideStudents?: Student[]) => void;
   loadGalaPreset: () => void;
   clearAll: () => void;
 }
@@ -133,20 +135,43 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     const savedExamInfo = localStorage.getItem('seatplan_exam_info');
     const savedPattern = localStorage.getItem('seatplan_pattern');
 
+    let loadedRooms: Room[] = DEFAULT_GALA_ROOMS;
+    let loadedStudents: Student[] = OFFICIAL_GALA_STUDENTS;
+    let needsRegen = false;
+
     if (savedRooms) {
-      try { setRooms(JSON.parse(savedRooms)); } catch (e) { console.error(e); }
+      try { 
+        const parsed = JSON.parse(savedRooms);
+        if (Array.isArray(parsed) && parsed.length > 0) loadedRooms = parsed;
+      } catch (e) { console.error(e); }
     }
     if (savedStudents) {
-      try { setStudents(JSON.parse(savedStudents)); } catch (e) { console.error(e); }
+      try { 
+        const parsed = JSON.parse(savedStudents);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          if (parsed[0]?.id?.startsWith('ICTOB-')) {
+            loadedStudents = OFFICIAL_GALA_STUDENTS;
+            needsRegen = true;
+          } else {
+            loadedStudents = parsed;
+          }
+        }
+      } catch (e) { console.error(e); }
     }
-    if (savedAssignments) {
-      try { setAssignments(JSON.parse(savedAssignments)); } catch (e) { console.error(e); }
-    }
+    setRooms(loadedRooms);
+    setStudents(loadedStudents);
+
     if (savedExamInfo) {
       try { setExamInfo(JSON.parse(savedExamInfo)); } catch (e) { console.error(e); }
     }
     if (savedPattern && (savedPattern === 'column-wise' || savedPattern === 'snake' || savedPattern === 'row-wise')) {
       setSeatingPattern(savedPattern as SeatingPattern);
+    }
+
+    if (savedAssignments && !needsRegen) {
+      try { setAssignments(JSON.parse(savedAssignments)); } catch (e) { console.error(e); }
+    } else {
+      generatePlan(loadedRooms, loadedStudents);
     }
   }, []);
 
@@ -264,8 +289,10 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Main plan generator supporting Gala Parallel logic
-  const generatePlan = () => {
-    if (rooms.length === 0 || students.length === 0) return;
+  const generatePlan = (overrideRooms?: Room[], overrideStudents?: Student[]) => {
+    const activeRooms = overrideRooms || rooms;
+    const activeStudents = overrideStudents || students;
+    if (activeRooms.length === 0 || activeStudents.length === 0) return;
 
     // Determine if this is ICT Olympiad Gala Round (or similar 13 classes setup)
     const isGroupA = (cls: string) => GROUP_A_CLASSES.includes(cls.trim());
@@ -274,7 +301,7 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     const groupAStudents: Student[] = [];
     const groupBStudents: Student[] = [];
 
-    students.forEach(s => {
+    activeStudents.forEach(s => {
       if (isGroupA(s.className)) {
         groupAStudents.push(s);
       } else {
@@ -283,8 +310,8 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Check if we have 5 standard rooms (101-105) or at least 2 rooms
-    const room101 = rooms.find(r => r.name.includes('101')) || rooms[0];
-    const room102 = rooms.find(r => r.name.includes('102')) || rooms[1] || rooms[0];
+    const room101 = activeRooms.find(r => r.name.includes('101')) || activeRooms[0];
+    const room102 = activeRooms.find(r => r.name.includes('102')) || activeRooms[1] || activeRooms[0];
 
     // Build Interleaved array of students for mixed seating
     const interleaveStudents = (studentList: Student[]): Student[] => {
@@ -481,7 +508,7 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     };
 
     // If other rooms exist (e.g. 103, 104, 105), add them with viva candidates for clear viewing
-    rooms.forEach(r => {
+    activeRooms.forEach(r => {
       if (!finalAssignments[r.name]) {
         // Collect students whose viva room is this room
         const roomStudents = [...room101Allocated, ...room102Allocated].filter(
@@ -492,36 +519,14 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     });
 
     setAssignments(finalAssignments);
+    localStorage.setItem('seatplan_assignments', JSON.stringify(finalAssignments));
   };
 
-  // Load Gala Round Season 3 Preset (130 students across 13 classes, 5 rooms)
+  // Load Gala Round Season 3 Preset (130 official students across 13 classes, 5 rooms)
   const loadGalaPreset = () => {
-    // 1) Set 5 standard rooms of 40 capacity
-    const galaRooms: Room[] = [
-      { id: 'room-101', name: '101', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'written' },
-      { id: 'room-102', name: '102', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'written' },
-      { id: 'room-103', name: '103', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'viva', vivaBoards: ['Board 1', 'Board 2'] },
-      { id: 'room-104', name: '104', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'viva', vivaBoards: ['Board 3', 'Board 4'] },
-      { id: 'room-105', name: '105', capacity: 40, rows: 8, cols: 5, seatsPerBench: 1, roomType: 'viva', vivaBoards: ['Board 5'] },
-    ];
+    const galaRooms = DEFAULT_GALA_ROOMS;
+    const galaStudents = OFFICIAL_GALA_STUDENTS;
 
-    // 2) Generate 130 students (10 per class)
-    const galaStudents: Student[] = [];
-    let idCounter = 1001;
-
-    GALA_CLASSES.forEach((className) => {
-      for (let i = 1; i <= 10; i++) {
-        const nameIdx = (idCounter - 1001 + i) % SAMPLE_NAMES.length;
-        galaStudents.push({
-          id: `ICTOB-${idCounter}`,
-          name: `${SAMPLE_NAMES[nameIdx]} (${i})`,
-          className: className
-        });
-        idCounter++;
-      }
-    });
-
-    // 3) Set Exam Info
     const galaExamInfo: ExamInfo = {
       title: 'Gala Round Grand Finale 2026',
       date: 'Saturday | 09:00 AM - 11:00 AM',
@@ -540,6 +545,9 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('seatplan_rooms', JSON.stringify(galaRooms));
     localStorage.setItem('seatplan_students', JSON.stringify(galaStudents));
     localStorage.setItem('seatplan_exam_info', JSON.stringify(galaExamInfo));
+    localStorage.setItem('seatplan_pattern', 'snake');
+
+    generatePlan(galaRooms, galaStudents);
   };
 
   return (

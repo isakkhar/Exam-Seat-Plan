@@ -385,6 +385,7 @@ export default function Dashboard() {
                   <th>Roll / ID</th>
                   <th>Student Name</th>
                   <th>Category / Class</th>
+                  <th>Institution / School</th>
                 </tr>
               </thead>
               <tbody>
@@ -397,11 +398,16 @@ export default function Dashboard() {
                         {s.className}
                       </span>
                     </td>
+                    <td>
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                        {s.institution || '—'}
+                      </span>
+                    </td>
                   </tr>
                 ))}
                 {students.length > 15 && (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>
                       ...এবং আরো {students.length - 15} জন শিক্ষার্থীর তালিকা
                     </td>
                   </tr>
