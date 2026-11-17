@@ -50,6 +50,31 @@ export default function ResultPage() {
   const [visualSlotFilter, setVisualSlotFilter] = useState<'all' | 'Slot 1' | 'Slot 2'>('Slot 1');
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Custom sub-filters
+  const [doorNoticeFilter, setDoorNoticeFilter] = useState<'all' | '101' | '102' | 'viva' | 'master'>('all');
+  const [attendanceFilter, setAttendanceFilter] = useState<string>('all');
+  const [evaluationBoardFilter, setEvaluationBoardFilter] = useState<string>('all');
+
+  // Helper for Viva Estimated Time
+  const getVivaEstimatedTime = (slot: 'Slot 1' | 'Slot 2', tokenIndex: number, totalInSlot: number) => {
+    const interval = Math.max(Math.floor(48 / Math.max(totalInSlot, 1)), 2);
+    if (slot === 'Slot 1') {
+      const totalMinutes = 9 * 60 + (tokenIndex * interval);
+      const hrs = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+      const period = hrs >= 12 ? 'PM' : 'AM';
+      const displayHrs = hrs > 12 ? hrs - 12 : hrs;
+      return `${String(displayHrs).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${period}`;
+    } else {
+      const totalMinutes = 10 * 60 + 5 + (tokenIndex * interval);
+      const hrs = Math.floor(totalMinutes / 60);
+      const mins = totalMinutes % 60;
+      const period = hrs >= 12 ? 'PM' : 'AM';
+      const displayHrs = hrs > 12 ? hrs - 12 : hrs;
+      return `${String(displayHrs).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${period}`;
+    }
+  };
+
   // Interactive seat swap state
   const [swapSelectedStudent, setSwapSelectedStudent] = useState<AllocatedStudent | null>(null);
   const [swapNotification, setSwapNotification] = useState<string | null>(null);
@@ -976,314 +1001,909 @@ export default function ResultPage() {
       {/* 4. NOTICE BOARD / DOOR NOTICES                            */}
       {/* ========================================================= */}
       {activeTab === 'notice' && (
-        <div id="printable-area" style={{ background: '#fff', padding: '2rem', borderRadius: '0.5rem', border: '2px solid #004b99' }}>
-          {/* Header */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #004b99', paddingBottom: '1rem', marginBottom: '1.5rem', gap: '1rem' }}>
-            <img src="/logo/logo.png" alt="Logo" style={{ height: '46px', width: 'auto' }} />
-            <div style={{ textAlign: 'center', flexGrow: 1 }}>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#004b99', margin: 0 }}>
-                ICT OLYMPIAD BANGLADESH - SEASON 3
-              </h1>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ff7a00' }}>
-                GALA ROUND GRAND FINALE • DOOR NOTICE & SEATING DIRECTORY
-              </div>
-              <div style={{ fontSize: '0.85rem', color: '#475569' }}>
-                পরীক্ষার সময়কাল: সকাল ০৯:০০ AM - ১১:০০ AM (প্যারালাল সেশন)
-              </div>
-            </div>
-            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
+        <div>
+          {/* Sub-tabs for Door Notice */}
+          <div className="no-print glass-card" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', padding: '0.65rem 1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)', marginRight: '0.5rem' }}>ফিল্টার করুন:</span>
+            {[
+              { id: 'all', label: '📄 সব নোটিশ (All Door Notices)' },
+              { id: '101', label: '🚪 Room 101 Door Notice' },
+              { id: '102', label: '🚪 Room 102 Door Notice' },
+              { id: 'viva', label: '🎤 Viva Rooms (103, 104, 105)' },
+              { id: 'master', label: '📋 Master Directory (সব ১৩টি ক্লাস)' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setDoorNoticeFilter(tab.id as any)}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: '0.4rem',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: doorNoticeFilter === tab.id ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
+                  background: doorNoticeFilter === tab.id ? 'var(--primary)' : 'var(--btn-unselected-bg)',
+                  color: doorNoticeFilter === tab.id ? '#fff' : 'var(--foreground)',
+                  cursor: 'pointer'
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
-          {/* Section 1: Written Examination Halls */}
-          <h3 style={{ color: '#004b99', borderBottom: '2px solid #004b99', paddingBottom: '0.4rem', marginBottom: '1rem' }}>
-            📝 লিখিত পরীক্ষা হল বণ্টন (Written Examination Halls)
-          </h3>
+          <div id="printable-area">
+            {/* 1) Individual Written Hall Door Notices (Room 101 & Room 102) */}
+            {['101', '102'].map((rName, rIdx) => {
+              if (doorNoticeFilter !== 'all' && doorNoticeFilter !== rName) return null;
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem', fontSize: '0.88rem' }}>
-            <thead>
-              <tr style={{ background: '#004b99', color: '#fff' }}>
-                <th style={{ padding: '0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', color: '#fff' }}>রুম নং</th>
-                <th style={{ padding: '0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', color: '#fff' }}>স্লট ১ (০৯:০০ - ০৯:৫০ AM)</th>
-                <th style={{ padding: '0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', color: '#fff' }}>স্লট ২ (১০:০৫ - ১০:৫৫ AM)</th>
-                <th style={{ padding: '0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', color: '#fff' }}>মোট আসন</th>
-              </tr>
-            </thead>
-            <tbody>
-              {['101', '102'].map(rName => {
-                const rStudents = assignments[rName] || [];
-                const slot1Students = rStudents.filter(s => s.group === 'Group A');
-                const slot2Students = rStudents.filter(s => s.group === 'Group B');
+              const rStudents = assignments[rName] || [];
+              const slot1Students = rStudents
+                .filter(s => s.group === 'Group A')
+                .sort((a, b) => (a.seatNumber || '').localeCompare(b.seatNumber || ''));
+              const slot2Students = rStudents
+                .filter(s => s.group === 'Group B')
+                .sort((a, b) => (a.seatNumber || '').localeCompare(b.seatNumber || ''));
 
-                return (
-                  <tr key={rName}>
-                    <td style={{ border: '1px solid #bfdbfe', padding: '0.75rem', textAlign: 'center', fontWeight: 900, fontSize: '1.1rem', color: '#004b99' }}>
-                      Room {rName}
-                    </td>
-                    <td style={{ border: '1px solid #bfdbfe', padding: '0.75rem' }}>
-                      <strong>Group A (৩৫ জন):</strong> Class 1 to 7<br />
-                      <span style={{ fontSize: '0.78rem', color: '#475569' }}>
-                        Roll: {slot1Students[0]?.id} - {slot1Students[slot1Students.length - 1]?.id}
+              return (
+                <div 
+                  key={`door-${rName}`} 
+                  className={rIdx > 0 && doorNoticeFilter === 'all' ? "print-page-break" : ""}
+                  style={{ 
+                    background: '#fff', 
+                    padding: '1.75rem', 
+                    borderRadius: '0.5rem', 
+                    border: '3px solid #004b99', 
+                    marginBottom: '2.5rem',
+                    boxShadow: '0 4px 16px rgba(0, 75, 153, 0.08)'
+                  }}
+                >
+                  {/* Notice Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #004b99', paddingBottom: '0.85rem', marginBottom: '1.25rem', gap: '1rem' }}>
+                    <img src="/logo/logo.png" alt="Logo" style={{ height: '46px', width: 'auto' }} />
+                    <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        ICT OLYMPIAD BANGLADESH - SEASON 3
+                      </div>
+                      <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#0b1a30', margin: '0.15rem 0' }}>
+                        HALL ROOM {rName} • OFFICIAL DOOR NOTICE & CANDIDATE SEATING
+                      </h1>
+                      <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
+                        লিখিত পরীক্ষা হল • মোট আসন: ৪০টি সিঙ্গেল চেয়ার | পরীক্ষার্থী সংখ্যা: {rStudents.length} জন (২টি সেশন)
+                      </div>
+                    </div>
+                    <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
+                  </div>
+
+                  {/* Section 1: Slot 1 Candidates (Group A) */}
+                  <div style={{ marginBottom: '2rem' }}>
+                    <div style={{ 
+                      background: 'linear-gradient(135deg, #004b99, #0284c7)', 
+                      color: '#ffffff', 
+                      padding: '0.55rem 0.85rem', 
+                      borderRadius: '0.35rem', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <span style={{ fontWeight: 900, fontSize: '0.95rem' }}>
+                        📝 স্লট ১ (সকাল ০৯:০০ AM – ০৯:৫০ AM) : গ্রুপ A পরীক্ষার্থী তালিকা ({slot1Students.length} জন)
                       </span>
-                    </td>
-                    <td style={{ border: '1px solid #bfdbfe', padding: '0.75rem' }}>
-                      <strong>Group B (৩০ জন):</strong> Class 8 to Engineering<br />
-                      <span style={{ fontSize: '0.78rem', color: '#475569' }}>
-                        Roll: {slot2Students[0]?.id} - {slot2Students[slot2Students.length - 1]?.id}
+                      <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.6rem', borderRadius: '0.25rem' }}>
+                        ক্যাটাগরি: Class 1 থেকে Class 7 | পরবর্তী ভাইভা: সকাল ১০:০৫ AM
                       </span>
-                    </td>
-                    <td style={{ border: '1px solid #bfdbfe', padding: '0.75rem', textAlign: 'center', fontWeight: 800 }}>
-                      ৪০টি সিঙ্গেল চেয়ার
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
 
-          {/* Section 2: Viva Voce Boards */}
-          <h3 style={{ color: '#c2410c', borderBottom: '2px solid #ea580c', paddingBottom: '0.4rem', marginBottom: '1rem' }}>
-            🎤 মৌখিক / ভাইভা বোর্ড বণ্টন (Viva Voce Boards)
-          </h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', color: '#000' }}>
+                      <thead>
+                        <tr style={{ background: '#eff6ff', borderBottom: '2px solid #004b99' }}>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#004b99' }}>সিট নং</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '115px', textAlign: 'center', color: '#004b99' }}>রোল / আইডি (Roll)</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>পরীক্ষার্থীর নাম (Candidate Name)</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>ক্যাটাগরি</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>শিক্ষা প্রতিষ্ঠান (School / College)</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '160px', textAlign: 'center', color: '#004b99' }}>পরবর্তী ভাইভা রুম ও বোর্ড</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {slot1Students.map((st) => (
+                          <tr key={st.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 900, color: '#004b99', background: '#f8fafc' }}>
+                              {st.writtenSeat || st.seatNumber}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace', fontSize: '0.88rem' }}>
+                              {st.id}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontWeight: 700 }}>
+                              {st.name}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                              <span style={{ fontWeight: 700, color: getClassColor(st.className).text }}>{st.className}</span>
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontSize: '0.78rem', color: '#334155' }}>
+                              {st.institution || '—'}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700, color: '#c2410c', background: '#fff7ed' }}>
+                              {st.vivaRoom} • {st.vivaBoard} (#{st.vivaToken})
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '2rem', fontSize: '0.88rem' }}>
-            <thead>
-              <tr style={{ background: '#ea580c', color: '#fff' }}>
-                <th style={{ padding: '0.6rem', border: '1px solid #fed7aa', textAlign: 'center', color: '#fff' }}>ভাইভা বোর্ড</th>
-                <th style={{ padding: '0.6rem', border: '1px solid #fed7aa', textAlign: 'center', color: '#fff' }}>রুম নং</th>
-                <th style={{ padding: '0.6rem', border: '1px solid #fed7aa', textAlign: 'center', color: '#fff' }}>স্লট ১ (০৯:০০ - ০৯:৫০ AM)</th>
-                <th style={{ padding: '0.6rem', border: '1px solid #fed7aa', textAlign: 'center', color: '#fff' }}>স্লট ২ (১০:০৫ - ১০:৫৫ AM)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Board 1</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Room 103</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 8 (১০ জন)</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 1 & Class 2 (২০ জন)</td>
-              </tr>
-              <tr>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Board 2</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Room 103</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 9/10 (১০ জন)</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 3 & Class 4 (২০ জন)</td>
-              </tr>
-              <tr>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Board 3</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Room 104</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 11/12 (১০ জন)</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 5 (১০ জন)</td>
-              </tr>
-              <tr>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Board 4</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Room 104</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Polytechnic (১০ জন)</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 6 (১০ জন)</td>
-              </tr>
-              <tr>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Board 5</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem', fontWeight: 800, textAlign: 'center' }}>Room 105</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Non-Eng & Engineering (২০ জন)</td>
-                <td style={{ border: '1px solid #fed7aa', padding: '0.65rem' }}>Class 7 (১০ জন)</td>
-              </tr>
-            </tbody>
-          </table>
+                  {/* Section 2: Slot 2 Candidates (Group B) */}
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <div style={{ 
+                      background: 'linear-gradient(135deg, #0284c7, #004b99)', 
+                      color: '#ffffff', 
+                      padding: '0.55rem 0.85rem', 
+                      borderRadius: '0.35rem', 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      marginBottom: '0.75rem'
+                    }}>
+                      <span style={{ fontWeight: 900, fontSize: '0.95rem' }}>
+                        📝 স্লট ২ (সকাল ১০:০৫ AM – ১০:৫৫ AM) : গ্রুপ B পরীক্ষার্থী তালিকা ({slot2Students.length} জন)
+                      </span>
+                      <span style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.2)', padding: '0.15rem 0.6rem', borderRadius: '0.25rem' }}>
+                        ক্যাটাগরি: Class 8 থেকে Engineering | ভাইভা শেষ করে রুমে প্রবেশ
+                      </span>
+                    </div>
 
-          {/* Footer Signatures */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3.5rem', padding: '0 2rem' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.3rem', fontWeight: 700 }}>
-                পরীক্ষা নিয়ন্ত্রক
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', color: '#000' }}>
+                      <thead>
+                        <tr style={{ background: '#eff6ff', borderBottom: '2px solid #004b99' }}>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#004b99' }}>সিট নং</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '115px', textAlign: 'center', color: '#004b99' }}>রোল / আইডি (Roll)</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>পরীক্ষার্থীর নাম (Candidate Name)</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>ক্যাটাগরি</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>শিক্ষা প্রতিষ্ঠান (School / College)</th>
+                          <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '160px', textAlign: 'center', color: '#004b99' }}>সকাল ০৯:০০ টার ভাইভা বোর্ড</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {slot2Students.map((st) => (
+                          <tr key={st.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 900, color: '#004b99', background: '#f8fafc' }}>
+                              {st.writtenSeat || st.seatNumber?.replace(' [Slot 2]', '')}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace', fontSize: '0.88rem' }}>
+                              {st.id}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontWeight: 700 }}>
+                              {st.name}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                              <span style={{ fontWeight: 700, color: getClassColor(st.className).text }}>{st.className}</span>
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontSize: '0.78rem', color: '#334155' }}>
+                              {st.institution || '—'}
+                            </td>
+                            <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700, color: '#c2410c', background: '#fff7ed' }}>
+                              {st.vivaRoom} • {st.vivaBoard} (#{st.vivaToken})
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Door Notice Footer */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '2px dashed #cbd5e1', paddingTop: '1rem', fontSize: '0.8rem', color: '#475569' }}>
+                    <div>
+                      <strong>বিশেষ দ্রষ্টব্য:</strong> প্রতিটি সিটে ১ জন করে বসবেন। প্রবেশপত্র সাথে রাখা বাধ্যতামূলক।
+                    </div>
+                    <div style={{ display: 'flex', gap: '3rem' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ borderTop: '1.5px solid #000', width: '150px', paddingTop: '0.2rem', fontWeight: 700 }}>
+                          হল ইনচার্জ স্বাক্ষর
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ borderTop: '1.5px solid #000', width: '150px', paddingTop: '0.2rem', fontWeight: 700 }}>
+                          পরীক্ষা নিয়ন্ত্রক
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* 2) Viva Rooms Dedicated Door Notices (Rooms 103, 104, 105) */}
+            {(doorNoticeFilter === 'all' || doorNoticeFilter === 'viva') && (
+              <div>
+                {[
+                  {
+                    roomNo: '103',
+                    boards: ['Board 1', 'Board 2'],
+                    desc: 'Board 1 (Class 8 / Class 1 & 2) & Board 2 (Class 9/10 / Class 3 & 4)'
+                  },
+                  {
+                    roomNo: '104',
+                    boards: ['Board 3', 'Board 4'],
+                    desc: 'Board 3 (Class 11/12 / Class 5) & Board 4 (Polytechnic / Class 6)'
+                  },
+                  {
+                    roomNo: '105',
+                    boards: ['Board 5'],
+                    desc: 'Board 5 (Non-Engineering & Engineering / Class 7)'
+                  }
+                ].map((vivaRoom, vIdx) => {
+                  const vivaRoomCandidates = allAllocatedStudents.filter(s => s.vivaRoom?.includes(vivaRoom.roomNo));
+
+                  return (
+                    <div 
+                      key={`viva-door-${vivaRoom.roomNo}`}
+                      className="print-page-break"
+                      style={{ 
+                        background: '#fff', 
+                        padding: '1.75rem', 
+                        borderRadius: '0.5rem', 
+                        border: '3px solid #ea580c', 
+                        marginBottom: '2.5rem',
+                        boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)'
+                      }}
+                    >
+                      {/* Notice Header */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #ea580c', paddingBottom: '0.85rem', marginBottom: '1.25rem', gap: '1rem' }}>
+                        <img src="/logo/logo.png" alt="Logo" style={{ height: '46px', width: 'auto' }} />
+                        <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            ICT OLYMPIAD BANGLADESH - SEASON 3
+                          </div>
+                          <h1 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#c2410c', margin: '0.15rem 0' }}>
+                            VIVA ROOM {vivaRoom.roomNo} • OFFICIAL DOOR NOTICE
+                          </h1>
+                          <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
+                            {vivaRoom.desc} • মোট পরীক্ষার্থী: {vivaRoomCandidates.length} জন
+                          </div>
+                        </div>
+                        <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
+                      </div>
+
+                      {vivaRoom.boards.map(bName => {
+                        const boardStudents = vivaRoomCandidates.filter(s => s.vivaBoard?.includes(bName));
+                        const slot1List = boardStudents.filter(s => s.group === 'Group B').sort((a, b) => (a.vivaToken || 0) - (b.vivaToken || 0));
+                        const slot2List = boardStudents.filter(s => s.group === 'Group A').sort((a, b) => (a.vivaToken || 0) - (b.vivaToken || 0));
+
+                        return (
+                          <div key={bName} style={{ marginBottom: '1.75rem' }}>
+                            <div style={{ 
+                              background: '#fff7ed', 
+                              border: '1.5px solid #fed7aa', 
+                              padding: '0.5rem 0.85rem', 
+                              borderRadius: '0.35rem', 
+                              fontWeight: 900, 
+                              color: '#c2410c',
+                              fontSize: '0.95rem',
+                              marginBottom: '0.65rem',
+                              display: 'flex',
+                              justifyContent: 'space-between'
+                            }}>
+                              <span>🎤 {bName} পরীক্ষার্থী তালিকা</span>
+                              <span style={{ fontSize: '0.8rem', color: '#7c2d12' }}>রুম নং: {vivaRoom.roomNo}</span>
+                            </div>
+
+                            {/* Slot 1 candidates for this board */}
+                            {slot1List.length > 0 && (
+                              <div style={{ marginBottom: '0.85rem' }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#004b99', marginBottom: '0.35rem' }}>
+                                  • স্লট ১ (সকাল ০৯:০০ - ০৯:৫০ AM) — {slot1List[0]?.className}:
+                                </div>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', color: '#000' }}>
+                                  <thead>
+                                    <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #fed7aa' }}>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '60px', textAlign: 'center' }}>টোকেন</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '85px', textAlign: 'center' }}>আনুমানিক সময়</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '120px', textAlign: 'center' }}>রোল / আইডি (Roll)</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', textAlign: 'left' }}>নাম (Candidate Name)</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '85px', textAlign: 'center' }}>ক্লাস</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', textAlign: 'left' }}>শিক্ষা প্রতিষ্ঠান</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '120px', textAlign: 'center' }}>পরবর্তী লিখিত হল</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {slot1List.map((st, idx) => (
+                                      <tr key={st.id}>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 900, color: '#ea580c' }}>#{st.vivaToken}</td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontSize: '0.75rem', fontWeight: 700 }}>
+                                          {getVivaEstimatedTime('Slot 1', idx, slot1List.length)}
+                                        </td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace' }}>{st.id}</td>
+                                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem', fontWeight: 700 }}>{st.name}</td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center' }}>{st.className}</td>
+                                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem', fontSize: '0.74rem' }}>{st.institution || '—'}</td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 700, color: '#004b99' }}>
+                                          {st.writtenRoom} ({st.writtenSeat})
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+
+                            {/* Slot 2 candidates for this board */}
+                            {slot2List.length > 0 && (
+                              <div>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#c2410c', marginBottom: '0.35rem' }}>
+                                  • স্লট ২ (সকাল ১০:০৫ - ১০:৫৫ AM) — {Array.from(new Set(slot2List.map(s => s.className))).join(', ')}:
+                                </div>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', color: '#000' }}>
+                                  <thead>
+                                    <tr style={{ background: '#f8fafc', borderBottom: '1.5px solid #fed7aa' }}>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '60px', textAlign: 'center' }}>টোকেন</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '85px', textAlign: 'center' }}>আনুমানিক সময়</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '120px', textAlign: 'center' }}>রোল / আইডি (Roll)</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', textAlign: 'left' }}>নাম (Candidate Name)</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '85px', textAlign: 'center' }}>ক্লাস</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', textAlign: 'left' }}>শিক্ষা প্রতিষ্ঠান</th>
+                                      <th style={{ border: '1px solid #fed7aa', padding: '0.35rem', width: '120px', textAlign: 'center' }}>পূর্ববর্তী লিখিত হল</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {slot2List.map((st, idx) => (
+                                      <tr key={st.id}>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 900, color: '#ea580c' }}>#{st.vivaToken}</td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontSize: '0.75rem', fontWeight: 700 }}>
+                                          {getVivaEstimatedTime('Slot 2', idx, slot2List.length)}
+                                        </td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace' }}>{st.id}</td>
+                                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem', fontWeight: 700 }}>{st.name}</td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center' }}>{st.className}</td>
+                                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem', fontSize: '0.74rem' }}>{st.institution || '—'}</td>
+                                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 700, color: '#004b99' }}>
+                                          {st.writtenRoom} ({st.writtenSeat})
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.3rem', fontWeight: 700 }}>
-                কনভেনর, আইসিটি অলিম্পিয়াড
+            )}
+
+            {/* 3) Master Venue Directory (সব ১৩টি ক্লাস) */}
+            {(doorNoticeFilter === 'all' || doorNoticeFilter === 'master') && (
+              <div 
+                className="print-page-break"
+                style={{ 
+                  background: '#fff', 
+                  padding: '1.75rem', 
+                  borderRadius: '0.5rem', 
+                  border: '3px solid #004b99', 
+                  marginBottom: '2.5rem' 
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #004b99', paddingBottom: '0.85rem', marginBottom: '1.25rem', gap: '1rem' }}>
+                  <img src="/logo/logo.png" alt="Logo" style={{ height: '46px', width: 'auto' }} />
+                  <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                    <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
+                      ICT OLYMPIAD BANGLADESH - SEASON 3
+                    </div>
+                    <h1 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0b1a30', margin: '0.15rem 0' }}>
+                      MASTER VENUE DIRECTORY (সব ১৩টি ক্যাটাগরি ও ১৩০ জন পরীক্ষার্থী)
+                    </h1>
+                    <div style={{ fontSize: '0.85rem', color: '#475569', fontWeight: 600 }}>
+                      সকল ক্যাটাগরির পরীক্ষার্থীদের লিখিত হল, সিট ও ভাইভা বোর্ডের সম্পূর্ণ মাস্টার চার্ট
+                    </div>
+                  </div>
+                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  {GALA_CLASSES.map(clsName => {
+                    const clsStudents = allAllocatedStudents.filter(s => s.className.trim() === clsName.trim());
+                    const colStyle = getClassColor(clsName);
+
+                    return (
+                      <div key={clsName} style={{ border: `1.5px solid ${colStyle.border}`, borderRadius: '0.4rem', overflow: 'hidden' }}>
+                        <div style={{ background: colStyle.bg, padding: '0.45rem 0.75rem', fontWeight: 800, color: colStyle.text, display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem' }}>
+                          <span>🏷️ {clsName} ({clsStudents.length} Candidates)</span>
+                          <span>পরীক্ষার গ্রুপ: {clsStudents[0]?.group}</span>
+                        </div>
+
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.78rem', color: '#000' }}>
+                          <thead>
+                            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                              <th style={{ padding: '0.35rem', width: '50px', textAlign: 'center' }}>র‍্যাঙ্ক</th>
+                              <th style={{ padding: '0.35rem', width: '115px', textAlign: 'center' }}>রোল / আইডি</th>
+                              <th style={{ padding: '0.35rem', textAlign: 'left' }}>পরীক্ষার্থীর নাম</th>
+                              <th style={{ padding: '0.35rem', textAlign: 'left' }}>শিক্ষা প্রতিষ্ঠান (School / College)</th>
+                              <th style={{ padding: '0.35rem', width: '130px', textAlign: 'center' }}>লিখিত পরীক্ষা হল ও সিট</th>
+                              <th style={{ padding: '0.35rem', width: '150px', textAlign: 'center' }}>ভাইভা পরীক্ষা বোর্ড ও রুম</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {clsStudents.map((st) => (
+                              <tr key={st.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                <td style={{ textAlign: 'center', fontWeight: 800, color: '#004b99' }}>#{st.rank || '—'}</td>
+                                <td style={{ textAlign: 'center', fontWeight: 800, fontFamily: 'monospace' }}>{st.id}</td>
+                                <td style={{ paddingLeft: '0.5rem', fontWeight: 700 }}>{st.name}</td>
+                                <td style={{ paddingLeft: '0.5rem', color: '#475569' }}>{st.institution || '—'}</td>
+                                <td style={{ textAlign: 'center', fontWeight: 700, color: '#004b99' }}>
+                                  {st.writtenRoom} ({st.writtenSeat})
+                                </td>
+                                <td style={{ textAlign: 'center', fontWeight: 700, color: '#c2410c' }}>
+                                  {st.vivaRoom} • {st.vivaBoard} (#{st.vivaToken})
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 5. ATTENDANCE SHEET                                       */}
+      {/* 5. ATTENDANCE & SIGNATURE REGISTER                        */}
       {/* ========================================================= */}
       {activeTab === 'attendance' && (
-        <div id="printable-area">
-          {['101', '102'].map((roomName, rIndex) => {
-            const roomStudents = assignments[roomName] || [];
-
-            return (
-              <div 
-                key={`att-${roomName}`} 
-                className={rIndex > 0 ? "print-page-break" : ""} 
-                style={{ background: '#fff', padding: '1.5rem', borderRadius: '0.5rem', border: '2px solid #004b99', marginBottom: '2rem' }}
+        <div>
+          {/* Sub-tabs for Attendance */}
+          <div className="no-print glass-card" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', padding: '0.65rem 1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary)', marginRight: '0.5rem' }}>সেশন নির্বাচন করুন:</span>
+            {[
+              { id: 'all', label: '📄 সব ৪টি শিট প্রিন্ট করুন (All Sessions)' },
+              { id: '101-1', label: 'Room 101 • Slot 1 (Group A - ৩৫ জন)' },
+              { id: '101-2', label: 'Room 101 • Slot 2 (Group B - ৩০ জন)' },
+              { id: '102-1', label: 'Room 102 • Slot 1 (Group A - ৩৫ জন)' },
+              { id: '102-2', label: 'Room 102 • Slot 2 (Group B - ৩০ জন)' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setAttendanceFilter(tab.id)}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: '0.4rem',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: attendanceFilter === tab.id ? '2px solid var(--primary)' : '1px solid var(--primary-border)',
+                  background: attendanceFilter === tab.id ? 'var(--primary)' : 'var(--btn-unselected-bg)',
+                  color: attendanceFilter === tab.id ? '#fff' : 'var(--foreground)',
+                  cursor: 'pointer'
+                }}
               >
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #004b99', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '1rem' }}>
-                  <img src="/logo/logo.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
-                  <div style={{ textAlign: 'center', flexGrow: 1 }}>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
-                      ICT OLYMPIAD BANGLADESH - SEASON 3
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div id="printable-area">
+            {[
+              {
+                id: '101-1',
+                roomName: '101',
+                slotName: 'Slot 1 (০৯:০০ AM – ০৯:৫০ AM)',
+                group: 'Group A',
+                groupDesc: 'Primary & Junior Track (Class 1 to Class 7)',
+                expectedCount: 35
+              },
+              {
+                id: '101-2',
+                roomName: '101',
+                slotName: 'Slot 2 (১০:০৫ AM – ১০:৫৫ AM)',
+                group: 'Group B',
+                groupDesc: 'Secondary & Higher Track (Class 8 to Engineering)',
+                expectedCount: 30
+              },
+              {
+                id: '102-1',
+                roomName: '102',
+                slotName: 'Slot 1 (০৯:০০ AM – ০৯:৫০ AM)',
+                group: 'Group A',
+                groupDesc: 'Primary & Junior Track (Class 1 to Class 7)',
+                expectedCount: 35
+              },
+              {
+                id: '102-2',
+                roomName: '102',
+                slotName: 'Slot 2 (১০:০৫ AM – ১০:৫৫ AM)',
+                group: 'Group B',
+                groupDesc: 'Secondary & Higher Track (Class 8 to Engineering)',
+                expectedCount: 30
+              },
+            ].map((sess, sIdx) => {
+              if (attendanceFilter !== 'all' && attendanceFilter !== sess.id) return null;
+
+              const sessionStudents = (assignments[sess.roomName] || [])
+                .filter(s => s.group === sess.group)
+                .sort((a, b) => (a.seatNumber || '').localeCompare(b.seatNumber || ''));
+
+              return (
+                <div 
+                  key={sess.id}
+                  className={sIdx > 0 && attendanceFilter === 'all' ? "print-page-break" : ""} 
+                  style={{ 
+                    background: '#fff', 
+                    padding: '1.5rem', 
+                    borderRadius: '0.5rem', 
+                    border: '2px solid #004b99', 
+                    marginBottom: '2rem' 
+                  }}
+                >
+                  {/* Attendance Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #004b99', paddingBottom: '0.75rem', marginBottom: '0.85rem', gap: '1rem' }}>
+                    <img src="/logo/logo.png" alt="Logo" style={{ height: '42px', width: 'auto' }} />
+                    <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
+                        ICT OLYMPIAD BANGLADESH - SEASON 3
+                      </div>
+                      <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0.15rem 0', color: '#0b1a30' }}>
+                        WRITTEN EXAMINATION OFFICIAL ATTENDANCE & SCRIPT REGISTER
+                      </h2>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0284c7' }}>
+                        হলের বিবরণ: ROOM {sess.roomName} • {sess.slotName} • {sess.group}
+                      </div>
                     </div>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 800, margin: '0.15rem 0', color: '#0b1a30' }}>
-                      WRITTEN EXAM ATTENDANCE & SIGNATURE SHEET
-                    </h2>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: '#0284c7' }}>
-                      GALA ROUND 2026 • ROOM {roomName}
+                    <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '65px', width: 'auto', objectFit: 'contain' }} />
+                  </div>
+
+                  {/* Summary Bar */}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    background: '#f8fafc', 
+                    padding: '0.5rem 0.75rem', 
+                    borderRadius: '0.4rem', 
+                    border: '1px solid #bfdbfe', 
+                    marginBottom: '0.85rem', 
+                    fontSize: '0.82rem', 
+                    color: '#1e293b' 
+                  }}>
+                    <div><strong>হল নং:</strong> Room {sess.roomName}</div>
+                    <div><strong>সেশন:</strong> {sess.slotName}</div>
+                    <div><strong>ক্যাটাগরি:</strong> {sess.groupDesc}</div>
+                    <div style={{ display: 'flex', gap: '0.65rem', fontWeight: 800 }}>
+                      <span>মোট: <strong>{sessionStudents.length}</strong></span>
+                      <span>উপস্থিত: <span style={{ border: '1px solid #94a3b8', display: 'inline-block', width: '30px', height: '16px', verticalAlign: 'middle', background: '#fff' }}></span></span>
+                      <span>অনুপস্থিত: <span style={{ border: '1px solid #94a3b8', display: 'inline-block', width: '30px', height: '16px', verticalAlign: 'middle', background: '#fff' }}></span></span>
                     </div>
                   </div>
-                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '65px', width: 'auto', objectFit: 'contain' }} />
-                </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.82rem', color: '#444' }}>
-                  <span><strong>Room:</strong> Room {roomName}</span>
-                  <span><strong>Total Candidates:</strong> {roomStudents.length} Students</span>
-                  <span><strong>Date:</strong> Saturday, 9:00 - 11:00 AM</span>
-                </div>
-
-                <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.82rem' }}>
-                  <thead>
-                    <tr style={{ background: '#eff6ff', borderBottom: '2px solid #004b99' }}>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '35px', textAlign: 'center', color: '#004b99' }}>SL</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '80px', textAlign: 'center', color: '#004b99' }}>Seat No</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '90px', textAlign: 'center', color: '#004b99' }}>Roll / ID</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>Student Name</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>Class</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', textAlign: 'left', color: '#004b99' }}>Institution / School</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '65px', textAlign: 'center', color: '#004b99' }}>Group</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '120px', textAlign: 'center', color: '#004b99' }}>Student Signature</th>
-                      <th style={{ border: '1px solid #bfdbfe', padding: '0.45rem', width: '85px', textAlign: 'center', color: '#004b99' }}>Script No</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {roomStudents.map((student, idx) => (
-                      <tr key={student.id} style={{ height: '34px', borderBottom: '1px solid #e2e8f0' }}>
-                        <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>{idx + 1}</td>
-                        <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, color: '#004b99' }}>
-                          {student.writtenSeat || student.seatNumber}
-                        </td>
-                        <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700 }}>{student.id}</td>
-                        <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontWeight: 600 }}>{student.name}</td>
-                        <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>{student.className}</td>
-                        <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.5rem', fontSize: '0.74rem', color: '#334155' }}>
-                          {student.institution || '—'}
-                        </td>
-                        <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 700 }}>{student.group}</td>
-                        <td style={{ border: '1px solid #bfdbfe' }}></td>
-                        <td style={{ border: '1px solid #bfdbfe' }}></td>
+                  {/* Candidates Attendance Table */}
+                  <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.8rem' }}>
+                    <thead>
+                      <tr style={{ background: '#eff6ff', borderBottom: '2px solid #004b99' }}>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '30px', textAlign: 'center', color: '#004b99' }}>ক্রমিক</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '65px', textAlign: 'center', color: '#004b99' }}>সিট নং</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '110px', textAlign: 'center', color: '#004b99' }}>রোল / আইডি</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', textAlign: 'left', color: '#004b99' }}>পরীক্ষার্থীর নাম (Candidate Name)</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '75px', textAlign: 'center', color: '#004b99' }}>ক্লাস</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', textAlign: 'left', color: '#004b99' }}>শিক্ষা প্রতিষ্ঠান (Institution)</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '90px', textAlign: 'center', color: '#004b99' }}>মূল খাতা নং</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '50px', textAlign: 'center', color: '#004b99' }}>অতিরিক্ত</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '125px', textAlign: 'center', color: '#004b99' }}>পরীক্ষার্থীর স্বাক্ষর</th>
+                        <th style={{ border: '1px solid #bfdbfe', padding: '0.4rem', width: '60px', textAlign: 'center', color: '#004b99' }}>পরিদর্শক</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {sessionStudents.map((st, idx) => (
+                        <tr key={st.id} style={{ height: '30px', borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>{idx + 1}</td>
+                          <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 900, color: '#004b99' }}>
+                            {st.writtenSeat || st.seatNumber?.replace(' [Slot 2]', '')}
+                          </td>
+                          <td style={{ border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace' }}>
+                            {st.id}
+                          </td>
+                          <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.45rem', fontWeight: 700 }}>
+                            {st.name}
+                          </td>
+                          <td style={{ border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                            {st.className}
+                          </td>
+                          <td style={{ border: '1px solid #bfdbfe', paddingLeft: '0.45rem', fontSize: '0.74rem', color: '#334155' }}>
+                            {st.institution || '—'}
+                          </td>
+                          {/* Main script write box */}
+                          <td style={{ border: '1px solid #bfdbfe', padding: '2px', textAlign: 'center' }}>
+                            <div style={{ height: '22px', border: '1px dashed #cbd5e1', borderRadius: '2px' }}></div>
+                          </td>
+                          {/* Extra script write box */}
+                          <td style={{ border: '1px solid #bfdbfe', padding: '2px', textAlign: 'center' }}>
+                            <div style={{ height: '22px', border: '1px dashed #cbd5e1', borderRadius: '2px' }}></div>
+                          </td>
+                          {/* Signature box */}
+                          <td style={{ border: '1px solid #bfdbfe', padding: '2px' }}>
+                            <div style={{ height: '22px' }}></div>
+                          </td>
+                          {/* Invigilator initial box */}
+                          <td style={{ border: '1px solid #bfdbfe', padding: '2px' }}>
+                            <div style={{ height: '22px' }}></div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3rem', padding: '0 1rem' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.25rem', fontSize: '0.8rem', fontWeight: 700 }}>
-                      Invigilator 1 Signature
+                  {/* Signatures at bottom */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', padding: '0 1rem' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ borderTop: '1.5px solid #000', width: '170px', paddingTop: '0.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                        হল পরিদর্শক ১ (স্বাক্ষর ও নাম)
+                      </div>
                     </div>
-                  </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.25rem', fontSize: '0.8rem', fontWeight: 700 }}>
-                      Invigilator 2 Signature
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ borderTop: '1.5px solid #000', width: '170px', paddingTop: '0.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                        হল পরিদর্শক ২ (স্বাক্ষর ও নাম)
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ borderTop: '1.5px solid #000', width: '170px', paddingTop: '0.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                        কেন্দ্র সুপারিনটেনডেন্ট স্বাক্ষর
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
       {/* ========================================================= */}
-      {/* 6. JUDGES VIVA EVALUATION SHEET                           */}
+      {/* 6. JUDGES VIVA VOCE EVALUATION & SCORE REGISTER           */}
       {/* ========================================================= */}
       {activeTab === 'evaluation' && (
-        <div id="printable-area">
-          {vivaBoardsList.map((boardName, bIdx) => {
-            const boardCandidates = allAllocatedStudents.filter(s => s.vivaBoard?.includes(boardName));
-
-            return (
-              <div 
-                key={boardName}
-                className={bIdx > 0 ? "print-page-break" : ""}
-                style={{ background: '#fff', padding: '1.5rem', borderRadius: '0.5rem', border: '2px solid #ea580c', marginBottom: '2rem' }}
+        <div>
+          {/* Sub-tabs for Viva Boards */}
+          <div className="no-print glass-card" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', padding: '0.65rem 1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#c2410c', marginRight: '0.5rem' }}>ভাইভা বোর্ড নির্বাচন:</span>
+            {[
+              { id: 'all', label: '📄 সব ৫টি বোর্ড শিট (All 5 Boards)' },
+              { id: 'Board 1', label: 'Board 1 (Room 103 • Class 8 / Class 1 & 2)' },
+              { id: 'Board 2', label: 'Board 2 (Room 103 • Class 9/10 / Class 3 & 4)' },
+              { id: 'Board 3', label: 'Board 3 (Room 104 • Class 11/12 / Class 5)' },
+              { id: 'Board 4', label: 'Board 4 (Room 104 • Polytechnic / Class 6)' },
+              { id: 'Board 5', label: 'Board 5 (Room 105 • Non-Eng & Eng / Class 7)' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setEvaluationBoardFilter(tab.id)}
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  borderRadius: '0.4rem',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  border: evaluationBoardFilter === tab.id ? '2px solid #ea580c' : '1px solid #fed7aa',
+                  background: evaluationBoardFilter === tab.id ? '#ea580c' : 'var(--btn-unselected-bg)',
+                  color: evaluationBoardFilter === tab.id ? '#fff' : 'var(--foreground)',
+                  cursor: 'pointer'
+                }}
               >
-                {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #ea580c', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '1rem' }}>
-                  <img src="/logo/logo.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
-                  <div style={{ textAlign: 'center', flexGrow: 1 }}>
-                    <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
-                      ICT OLYMPIAD BANGLADESH - SEASON 3
-                    </div>
-                    <h2 style={{ fontSize: '1.3rem', fontWeight: 900, margin: '0.15rem 0', color: '#c2410c' }}>
-                      VIVA VOCE EVALUATION & SCORE SHEET
-                    </h2>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0b1a30' }}>
-                      {boardName} ({boardCandidates[0]?.vivaRoom || 'Room 103'}) • Total Candidates: {boardCandidates.length}
-                    </div>
-                  </div>
-                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '65px', width: 'auto', objectFit: 'contain' }} />
-                </div>
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.82rem' }}>
-                  <thead>
-                    <tr style={{ background: '#fff7ed', borderBottom: '2px solid #ea580c' }}>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '45px', textAlign: 'center', color: '#c2410c' }}>Token</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '90px', textAlign: 'center', color: '#c2410c' }}>Roll ID</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', textAlign: 'left', color: '#c2410c' }}>Candidate Name</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '90px', textAlign: 'center', color: '#c2410c' }}>Category</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '90px', textAlign: 'center', color: '#c2410c' }}>Slot Time</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>Tech (15)</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>Pres (10)</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>Prob (15)</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>Total (40)</th>
-                      <th style={{ border: '1px solid #fed7aa', padding: '0.45rem', width: '100px', textAlign: 'center', color: '#c2410c' }}>Remarks</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {boardCandidates.map((student) => (
-                      <tr key={student.id} style={{ height: '34px', borderBottom: '1px solid #fed7aa' }}>
-                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 900, color: '#ea580c' }}>
-                          #{student.vivaToken}
-                        </td>
-                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 700 }}>{student.id}</td>
-                        <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.5rem' }}>
-                          <div style={{ fontWeight: 700 }}>{student.name}</div>
-                          {student.institution && (
-                            <div style={{ fontSize: '0.68rem', color: '#7c2d12', marginTop: '0.1rem' }}>
-                              {student.institution}
-                            </div>
-                          )}
-                        </td>
-                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center' }}>{student.className}</td>
-                        <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontSize: '0.72rem' }}>
-                          {student.group === 'Group B' ? 'Slot 1' : 'Slot 2'}
-                        </td>
-                        <td style={{ border: '1px solid #fed7aa' }}></td>
-                        <td style={{ border: '1px solid #fed7aa' }}></td>
-                        <td style={{ border: '1px solid #fed7aa' }}></td>
-                        <td style={{ border: '1px solid #fed7aa' }}></td>
-                        <td style={{ border: '1px solid #fed7aa' }}></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          <div id="printable-area">
+            {vivaBoardsList.map((boardName, bIdx) => {
+              if (evaluationBoardFilter !== 'all' && evaluationBoardFilter !== boardName) return null;
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '3.5rem', padding: '0 1rem' }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.25rem', fontSize: '0.8rem', fontWeight: 700 }}>
-                      Judge 1 Signature
+              const boardCandidates = allAllocatedStudents.filter(s => s.vivaBoard?.includes(boardName));
+              const slot1Candidates = boardCandidates.filter(s => s.group === 'Group B').sort((a, b) => (a.vivaToken || 0) - (b.vivaToken || 0));
+              const slot2Candidates = boardCandidates.filter(s => s.group === 'Group A').sort((a, b) => (a.vivaToken || 0) - (b.vivaToken || 0));
+
+              return (
+                <div 
+                  key={boardName}
+                  className={bIdx > 0 && evaluationBoardFilter === 'all' ? "print-page-break" : ""}
+                  style={{ 
+                    background: '#fff', 
+                    padding: '1.5rem', 
+                    borderRadius: '0.5rem', 
+                    border: '2.5px solid #ea580c', 
+                    marginBottom: '2.5rem',
+                    boxShadow: '0 4px 16px rgba(234, 88, 12, 0.08)'
+                  }}
+                >
+                  {/* Header */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #ea580c', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '1rem' }}>
+                    <img src="/logo/logo.png" alt="Logo" style={{ height: '42px', width: 'auto' }} />
+                    <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
+                        ICT OLYMPIAD BANGLADESH - SEASON 3
+                      </div>
+                      <h2 style={{ fontSize: '1.35rem', fontWeight: 900, margin: '0.15rem 0', color: '#c2410c' }}>
+                        VIVA VOCE EVALUATION & OFFICIAL SCORE REGISTER
+                      </h2>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#0b1a30' }}>
+                        {boardName} ({boardCandidates[0]?.vivaRoom || 'Room 103'}) • মোট পরীক্ষার্থী: {boardCandidates.length} জন
+                      </div>
                     </div>
+                    <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '65px', width: 'auto', objectFit: 'contain' }} />
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ borderTop: '1.5px solid #000', width: '180px', paddingTop: '0.25rem', fontSize: '0.8rem', fontWeight: 700 }}>
-                      Judge 2 Signature
+
+                  {/* Marking Rubrics Banner */}
+                  <div style={{ 
+                    background: '#fff7ed', 
+                    border: '1.5px solid #fed7aa', 
+                    padding: '0.45rem 0.85rem', 
+                    borderRadius: '0.4rem', 
+                    marginBottom: '1rem', 
+                    fontSize: '0.8rem', 
+                    color: '#7c2d12',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.5rem'
+                  }}>
+                    <span><strong>মূল্যায়ন নির্দেশিকা:</strong> প্রতি পরীক্ষার্থী সর্বোচ্চ ৩-৪ মিনিট।</span>
+                    <span><strong>আইসিটি ও প্রযুক্তি জ্ঞান:</strong> ১৫ নম্বর</span>
+                    <span><strong>যুক্তি ও উপস্থিত বুদ্ধি:</strong> ১৫ নম্বর</span>
+                    <span><strong>উপস্থাপন ও বাচনভঙ্গি:</strong> ১০ নম্বর</span>
+                    <span><strong>মোট নম্বর:</strong> ৪০ নম্বর</span>
+                  </div>
+
+                  {/* Session 1 (Slot 1 Candidates) */}
+                  {slot1Candidates.length > 0 && (
+                    <div style={{ marginBottom: '1.75rem' }}>
+                      <div style={{ 
+                        background: '#ea580c', 
+                        color: '#fff', 
+                        padding: '0.45rem 0.75rem', 
+                        borderRadius: '0.3rem', 
+                        fontWeight: 900, 
+                        fontSize: '0.88rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <span>সেশন ১ (সকাল ০৯:০০ AM – ০৯:৫০ AM) : {slot1Candidates[0]?.className} ({slot1Candidates.length} জন)</span>
+                        <span>সময়কাল: ৫০ মিনিট (টোকেন ১ - {slot1Candidates.length})</span>
+                      </div>
+
+                      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.8rem' }}>
+                        <thead>
+                          <tr style={{ background: '#fff7ed', borderBottom: '2px solid #ea580c' }}>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '45px', textAlign: 'center', color: '#c2410c' }}>টোকেন</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '75px', textAlign: 'center', color: '#c2410c' }}>আনুমানিক সময়</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '110px', textAlign: 'center', color: '#c2410c' }}>রোল / আইডি (Roll)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', textAlign: 'left', color: '#c2410c' }}>পরীক্ষার্থীর নাম ও শিক্ষা প্রতিষ্ঠান</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '80px', textAlign: 'center', color: '#c2410c' }}>ক্যাটাগরি</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>আইসিটি (১৫)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>যুক্তি (১৫)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>উপস্থাপন (১০)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '75px', textAlign: 'center', color: '#c2410c' }}>মোট (৪০)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '110px', textAlign: 'center', color: '#c2410c' }}>মেধাক্রম / মন্তব্য</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {slot1Candidates.map((st, idx) => (
+                            <tr key={st.id} style={{ height: '34px', borderBottom: '1px solid #fed7aa' }}>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 900, color: '#ea580c' }}>
+                                #{st.vivaToken}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontSize: '0.74rem', fontWeight: 700 }}>
+                                {getVivaEstimatedTime('Slot 1', idx, slot1Candidates.length)}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace' }}>
+                                {st.id}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.45rem' }}>
+                                <div style={{ fontWeight: 700 }}>{st.name}</div>
+                                {st.institution && (
+                                  <div style={{ fontSize: '0.68rem', color: '#7c2d12', marginTop: '0.1rem' }}>{st.institution}</div>
+                                )}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center' }}>{st.className}</td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                              <td style={{ border: '1px solid #fed7aa', background: '#fffbeb' }}></td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Session 2 (Slot 2 Candidates) */}
+                  {slot2Candidates.length > 0 && (
+                    <div style={{ marginBottom: '1.5rem' }}>
+                      <div style={{ 
+                        background: '#c2410c', 
+                        color: '#fff', 
+                        padding: '0.45rem 0.75rem', 
+                        borderRadius: '0.3rem', 
+                        fontWeight: 900, 
+                        fontSize: '0.88rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '0.5rem'
+                      }}>
+                        <span>সেশন ২ (সকাল ১০:০৫ AM – ১০:৫৫ AM) : {Array.from(new Set(slot2Candidates.map(s => s.className))).join(', ')} ({slot2Candidates.length} জন)</span>
+                        <span>সময়কাল: ৫০ মিনিট (টোকেন ১ - {slot2Candidates.length})</span>
+                      </div>
+
+                      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.8rem' }}>
+                        <thead>
+                          <tr style={{ background: '#fff7ed', borderBottom: '2px solid #ea580c' }}>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '45px', textAlign: 'center', color: '#c2410c' }}>টোকেন</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '75px', textAlign: 'center', color: '#c2410c' }}>আনুমানিক সময়</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '110px', textAlign: 'center', color: '#c2410c' }}>রোল / আইডি (Roll)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', textAlign: 'left', color: '#c2410c' }}>পরীক্ষার্থীর নাম ও শিক্ষা প্রতিষ্ঠান</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '80px', textAlign: 'center', color: '#c2410c' }}>ক্যাটাগরি</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>আইসিটি (১৫)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>যুক্তি (১৫)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '70px', textAlign: 'center', color: '#c2410c' }}>উপস্থাপন (১০)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '75px', textAlign: 'center', color: '#c2410c' }}>মোট (৪০)</th>
+                            <th style={{ border: '1px solid #fed7aa', padding: '0.4rem', width: '110px', textAlign: 'center', color: '#c2410c' }}>মেধাক্রম / মন্তব্য</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {slot2Candidates.map((st, idx) => (
+                            <tr key={st.id} style={{ height: '34px', borderBottom: '1px solid #fed7aa' }}>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 900, color: '#ea580c' }}>
+                                #{st.vivaToken}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontSize: '0.74rem', fontWeight: 700 }}>
+                                {getVivaEstimatedTime('Slot 2', idx, slot2Candidates.length)}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, fontFamily: 'monospace' }}>
+                                {st.id}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', paddingLeft: '0.45rem' }}>
+                                <div style={{ fontWeight: 700 }}>{st.name}</div>
+                                {st.institution && (
+                                  <div style={{ fontSize: '0.68rem', color: '#7c2d12', marginTop: '0.1rem' }}>{st.institution}</div>
+                                )}
+                              </td>
+                              <td style={{ border: '1px solid #fed7aa', textAlign: 'center' }}>{st.className}</td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                              <td style={{ border: '1px solid #fed7aa', background: '#fffbeb' }}></td>
+                              <td style={{ border: '1px solid #fed7aa' }}></td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Footer Signatures */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '2.5rem', padding: '0 1rem' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ borderTop: '1.5px solid #000', width: '170px', paddingTop: '0.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                        বিচারক ১ (স্বাক্ষর ও নাম)
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ borderTop: '1.5px solid #000', width: '170px', paddingTop: '0.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                        বিচারক ২ (স্বাক্ষর ও নাম)
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ borderTop: '1.5px solid #000', width: '170px', paddingTop: '0.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                        ভাইভা বোর্ড প্রধান / আহ্বায়ক
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       )}
 
