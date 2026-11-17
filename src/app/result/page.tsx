@@ -61,6 +61,7 @@ export default function ResultPage() {
   const [winnersSubView, setWinnersSubView] = useState<'sheet' | 'podium' | 'entry'>('sheet');
   const [winnerCategoryFilter, setWinnerCategoryFilter] = useState<string>('all');
   const [candidateScores, setCandidateScores] = useState<Record<string, { written?: number; viva?: number }>>({});
+  const [publicationSheetMode, setPublicationSheetMode] = useState<'blank' | 'filled'>('blank');
 
   // Helper for Viva Estimated Time
   const getVivaEstimatedTime = (slot: 'Slot 1' | 'Slot 2', tokenIndex: number, totalInSlot: number) => {
@@ -2270,12 +2271,47 @@ export default function ResultPage() {
           {/* VIEW 1: OFFICIAL PUBLICATION SHEETS (A4 PRINT READY) */}
           {/* Always rendered in print mode! On screen when winnersSubView === 'sheet' */}
           <div className={winnersSubView === 'sheet' ? '' : 'only-print'}>
-            <div className="no-print" style={{ background: '#ecfdf5', border: '1px solid #a7f3d0', padding: '0.75rem 1rem', borderRadius: '0.5rem', marginBottom: '1.25rem', color: '#065f46', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Sparkles size={18} color="#059669" />
-              <span>
-                <strong>প্রিন্ট নির্দেশনা:</strong> উপরের <strong>Print Now</strong> বাটনে ক্লিক করলে এটি স্বয়ংক্রিয়ভাবে দুটি নিখুঁত A4 পাতায় প্রিন্ট হবে। 
-                <strong>পাতা ১:</strong> প্রাইমারি ও জুনিয়র ট্র্যাক (Class 1-7: ২১ জন বিজয়ী) এবং <strong>পাতা ২:</strong> সেকেন্ডারি ও সিনিয়র ট্র্যাক (Class 8-Engineering: ১৮ জন বিজয়ী)।
-              </span>
+            <div className="no-print" style={{ background: '#eff6ff', border: '1px solid #bfdbfe', padding: '0.85rem 1.25rem', borderRadius: '0.5rem', marginBottom: '1.25rem', color: '#1e40af', fontSize: '0.85rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Sparkles size={18} color="#2563eb" />
+                  <span>
+                    <strong>পাবলিকেশন শিট ফরম্যাট:</strong> এটি খালি (ব্ল্যাঙ্ক) রাখা হয়েছে যাতে বিচারক ও কমিটি পরীক্ষার পর হাতে লিখে অফিশিয়ালি ফলাফল প্রকাশ ও স্বাক্ষর করতে পারেন।
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                  <button
+                    onClick={() => setPublicationSheetMode('blank')}
+                    style={{
+                      padding: '0.35rem 0.8rem',
+                      borderRadius: '0.35rem',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      border: publicationSheetMode === 'blank' ? '2px solid #004b99' : '1px solid #cbd5e1',
+                      background: publicationSheetMode === 'blank' ? '#004b99' : '#ffffff',
+                      color: publicationSheetMode === 'blank' ? '#ffffff' : '#334155',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📄 অফিশিয়াল খালি শিট (Default)
+                  </button>
+                  <button
+                    onClick={() => setPublicationSheetMode('filled')}
+                    style={{
+                      padding: '0.35rem 0.8rem',
+                      borderRadius: '0.35rem',
+                      fontSize: '0.78rem',
+                      fontWeight: 800,
+                      border: publicationSheetMode === 'filled' ? '2px solid #004b99' : '1px solid #cbd5e1',
+                      background: publicationSheetMode === 'filled' ? '#004b99' : '#ffffff',
+                      color: publicationSheetMode === 'filled' ? '#ffffff' : '#334155',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    📝 এন্ট্রি করা ডাটা সহ
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* PAGE 1: GROUP A (CLASS 1 - 7: 21 WINNERS) */}
@@ -2325,48 +2361,58 @@ export default function ResultPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {groupAWinners.map((w) => {
-                      const isChampion = w.rankIndex === 0;
-                      const is1stRunner = w.rankIndex === 1;
-                      const rowBg = isChampion ? '#fefce8' : is1stRunner ? '#f8fafc' : '#fff7ed';
-                      const badgeBg = isChampion ? '#fef08a' : is1stRunner ? '#e2e8f0' : '#fed7aa';
-                      const badgeText = isChampion ? '#854d0e' : is1stRunner ? '#334155' : '#9a3412';
+                    {GROUP_A_CLASSES.flatMap(className => {
+                      const classWinners = categoryWinnersMap.find(cw => cw.className === className)?.winners || [];
+                      return [0, 1, 2].map(posIndex => {
+                        const winnerObj = classWinners[posIndex];
+                        const isChamp = posIndex === 0;
+                        const is1st = posIndex === 1;
+                        const posTitle = isChamp ? 'চ্যাম্পিয়ন' : is1st ? '১ম রানার আপ' : '২য় রানার আপ';
+                        const defaultAward = isChamp ? 'গোল্ড মেডেল ও চ্যাম্পিয়ন ট্রফি' : is1st ? 'সিলভার মেডেল ও ট্রফি' : 'ব্রোঞ্জ মেডেল ও ট্রফি';
+                        const badgeBg = isChamp ? '#fef08a' : is1st ? '#e2e8f0' : '#fed7aa';
+                        const badgeText = isChamp ? '#854d0e' : is1st ? '#334155' : '#9a3412';
+                        const rowBg = isChamp ? '#fefce8' : is1st ? '#f8fafc' : '#fff7ed';
 
-                      return (
-                        <tr key={w.student.id} style={{ background: rowBg }}>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.2rem' }}>
-                            {w.rankIndex === 0 ? w.category : ''}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.2rem' }}>
-                            <span style={{ display: 'inline-block', background: badgeBg, color: badgeText, padding: '0.1rem 0.35rem', borderRadius: '0.25rem', fontWeight: 800, fontSize: '0.68rem' }}>
-                              {w.bengaliTitle}
-                            </span>
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.72rem', padding: '0.2rem' }}>
-                            {w.student.id}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', padding: '0.2rem 0.4rem' }}>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.74rem' }}>{w.student.name}</div>
-                            {w.student.institution && (
-                              <div style={{ fontSize: '0.62rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
-                                {w.student.institution}
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.2rem' }}>
-                            {w.scores.written}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.2rem' }}>
-                            {w.scores.viva}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 900, background: isChampion ? '#fef9c3' : '#f1f5f9', color: '#004b99', padding: '0.2rem' }}>
-                            {w.scores.total}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '0.66rem', fontWeight: 700, padding: '0.2rem' }}>
-                            {w.award}
-                          </td>
-                        </tr>
-                      );
+                        return (
+                          <tr key={`${className}-${posIndex}`} style={{ background: rowBg, height: '31px' }}>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.2rem' }}>
+                              {posIndex === 0 ? className : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.2rem' }}>
+                              <span style={{ display: 'inline-block', background: badgeBg, color: badgeText, padding: '0.12rem 0.4rem', borderRadius: '0.25rem', fontWeight: 800, fontSize: '0.68rem' }}>
+                                {posTitle}
+                              </span>
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.72rem', padding: '0.2rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.student.id : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', padding: '0.2rem 0.45rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? (
+                                <>
+                                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.74rem' }}>{winnerObj.student.name}</div>
+                                  {winnerObj.student.institution && (
+                                    <div style={{ fontSize: '0.62rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
+                                      {winnerObj.student.institution}
+                                    </div>
+                                  )}
+                                </>
+                              ) : null}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.2rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.written : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.2rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.viva : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 900, background: isChamp ? '#fef9c3' : '#f1f5f9', color: '#004b99', padding: '0.2rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.total : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '0.66rem', fontWeight: 700, padding: '0.2rem' }}>
+                              {winnerObj?.award || defaultAward}
+                            </td>
+                          </tr>
+                        );
+                      });
                     })}
                   </tbody>
                 </table>
@@ -2444,48 +2490,58 @@ export default function ResultPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {groupBWinners.map((w) => {
-                      const isChampion = w.rankIndex === 0;
-                      const is1stRunner = w.rankIndex === 1;
-                      const rowBg = isChampion ? '#fefce8' : is1stRunner ? '#f8fafc' : '#fff7ed';
-                      const badgeBg = isChampion ? '#fef08a' : is1stRunner ? '#e2e8f0' : '#fed7aa';
-                      const badgeText = isChampion ? '#854d0e' : is1stRunner ? '#334155' : '#9a3412';
+                    {GROUP_B_CLASSES.flatMap(className => {
+                      const classWinners = categoryWinnersMap.find(cw => cw.className === className)?.winners || [];
+                      return [0, 1, 2].map(posIndex => {
+                        const winnerObj = classWinners[posIndex];
+                        const isChamp = posIndex === 0;
+                        const is1st = posIndex === 1;
+                        const posTitle = isChamp ? 'চ্যাম্পিয়ন' : is1st ? '১ম রানার আপ' : '২য় রানার আপ';
+                        const defaultAward = isChamp ? 'গোল্ড মেডেল ও চ্যাম্পিয়ন ট্রফি' : is1st ? 'সিলভার মেডেল ও ট্রফি' : 'ব্রোঞ্জ মেডেল ও ট্রফি';
+                        const badgeBg = isChamp ? '#fef08a' : is1st ? '#e2e8f0' : '#fed7aa';
+                        const badgeText = isChamp ? '#854d0e' : is1st ? '#334155' : '#9a3412';
+                        const rowBg = isChamp ? '#fefce8' : is1st ? '#f8fafc' : '#fff7ed';
 
-                      return (
-                        <tr key={w.student.id} style={{ background: rowBg }}>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.24rem' }}>
-                            {w.rankIndex === 0 ? w.category : ''}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.24rem' }}>
-                            <span style={{ display: 'inline-block', background: badgeBg, color: badgeText, padding: '0.12rem 0.35rem', borderRadius: '0.25rem', fontWeight: 800, fontSize: '0.68rem' }}>
-                              {w.bengaliTitle}
-                            </span>
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.72rem', padding: '0.24rem' }}>
-                            {w.student.id}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', padding: '0.24rem 0.4rem' }}>
-                            <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.76rem' }}>{w.student.name}</div>
-                            {w.student.institution && (
-                              <div style={{ fontSize: '0.64rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
-                                {w.student.institution}
-                              </div>
-                            )}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.24rem' }}>
-                            {w.scores.written}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.24rem' }}>
-                            {w.scores.viva}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 900, background: isChampion ? '#fef9c3' : '#f1f5f9', color: '#004b99', padding: '0.24rem' }}>
-                            {w.scores.total}
-                          </td>
-                          <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '0.68rem', fontWeight: 700, padding: '0.24rem' }}>
-                            {w.award}
-                          </td>
-                        </tr>
-                      );
+                        return (
+                          <tr key={`${className}-${posIndex}`} style={{ background: rowBg, height: '36px' }}>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 800, padding: '0.24rem' }}>
+                              {posIndex === 0 ? className : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.24rem' }}>
+                              <span style={{ display: 'inline-block', background: badgeBg, color: badgeText, padding: '0.14rem 0.4rem', borderRadius: '0.25rem', fontWeight: 800, fontSize: '0.68rem' }}>
+                                {posTitle}
+                              </span>
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.72rem', padding: '0.24rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.student.id : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', padding: '0.24rem 0.45rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? (
+                                <>
+                                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.76rem' }}>{winnerObj.student.name}</div>
+                                  {winnerObj.student.institution && (
+                                    <div style={{ fontSize: '0.64rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
+                                      {winnerObj.student.institution}
+                                    </div>
+                                  )}
+                                </>
+                              ) : null}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.24rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.written : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.24rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.viva : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 900, background: isChamp ? '#fef9c3' : '#f1f5f9', color: '#004b99', padding: '0.24rem' }}>
+                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.total : ''}
+                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '0.68rem', fontWeight: 700, padding: '0.24rem' }}>
+                              {winnerObj?.award || defaultAward}
+                            </td>
+                          </tr>
+                        );
+                      });
                     })}
                   </tbody>
                 </table>
