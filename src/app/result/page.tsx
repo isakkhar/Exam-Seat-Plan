@@ -73,11 +73,7 @@ export default function ResultPage() {
   const [attendanceFilter, setAttendanceFilter] = useState<string>('all');
   const [evaluationBoardFilter, setEvaluationBoardFilter] = useState<string>('all');
 
-  // Winners tab state
-  const [winnersSubView, setWinnersSubView] = useState<'sheet' | 'podium' | 'entry'>('sheet');
-  const [winnerCategoryFilter, setWinnerCategoryFilter] = useState<string>('all');
-  const [candidateScores, setCandidateScores] = useState<Record<string, { written?: number; viva?: number }>>({});
-  const [publicationSheetMode, setPublicationSheetMode] = useState<'blank' | 'filled'>('blank');
+
 
   // Helper for Viva Estimated Time
   const getVivaEstimatedTime = (slot: 'Slot 1' | 'Slot 2', tokenIndex: number, totalInSlot: number) => {
@@ -201,132 +197,36 @@ export default function ResultPage() {
     XLSX.writeFile(wb, "ICT_Olympiad_Season3_Gala_SeatPlan.xlsx");
   };
 
-  // Score Calculation & Dynamic Evaluation Logic
-  const getCandidateScore = (student: AllocatedStudent) => {
-    const custom = candidateScores[student.id];
-    const rankNum = parseInt(student.rank || '10', 10);
-    // Baseline marks for gala candidates if not yet scored live:
-    // Rank 1: written 28, viva 38 (total 66/70)
-    // Rank 2: written 26, viva 36 (total 62/70)
-    // Rank 3: written 25, viva 34 (total 59/70)
-    const defaultWritten = Math.max(30 - rankNum * 2, 14);
-    const defaultViva = Math.max(40 - rankNum * 2, 18);
-    const written = custom?.written !== undefined ? custom.written : defaultWritten;
-    const viva = custom?.viva !== undefined ? custom.viva : defaultViva;
-    const total = written + viva;
-    return { written, viva, total };
-  };
 
-  const handleScoreChange = (studentId: string, type: 'written' | 'viva', value: number) => {
-    setCandidateScores(prev => ({
-      ...prev,
-      [studentId]: {
-        ...prev[studentId],
-        [type]: isNaN(value) ? 0 : Math.max(0, Math.min(type === 'written' ? 30 : 40, value))
-      }
-    }));
-  };
 
-  // 39 Winners Map across 13 Categories (3 per category: Champion, 1st Runner Up, 2nd Runner Up)
-  const categoryWinnersMap = GALA_CLASSES.map(className => {
-    const studentsInClass = allAllocatedStudents.filter(s => s.className === className);
-    const sortedStudents = [...studentsInClass].sort((a, b) => {
-      const scoreA = getCandidateScore(a).total;
-      const scoreB = getCandidateScore(b).total;
-      if (scoreB !== scoreA) {
-        return scoreB - scoreA;
-      }
-      return parseInt(a.rank || '99', 10) - parseInt(b.rank || '99', 10);
-    });
-
-    const top3 = sortedStudents.slice(0, 3).map((st, index) => {
-      const scores = getCandidateScore(st);
-      if (index === 0) {
-        return {
-          category: className,
-          rankIndex: 0,
-          position: 'Champion' as const,
-          bengaliTitle: 'চ্যাম্পিয়ন',
-          medal: '🥇 গোল্ড মেডেল',
-          crest: '🏆 চ্যাম্পিয়ন ট্রফি',
-          award: 'গোল্ড মেডেল ও চ্যাম্পিয়ন ট্রফি',
-          badgeBg: '#fef3c7',
-          badgeColor: '#b45309',
-          border: '#f59e0b',
-          student: st,
-          scores
-        };
-      } else if (index === 1) {
-        return {
-          category: className,
-          rankIndex: 1,
-          position: '1st Runner Up' as const,
-          bengaliTitle: '১ম রানার আপ',
-          medal: '🥈 সিলভার মেডেল',
-          crest: '🥈 ১ম রানার আপ ট্রফি',
-          award: 'সিলভার মেডেল ও ট্রফি',
-          badgeBg: '#f1f5f9',
-          badgeColor: '#334155',
-          border: '#94a3b8',
-          student: st,
-          scores
-        };
-      } else {
-        return {
-          category: className,
-          rankIndex: 2,
-          position: '2nd Runner Up' as const,
-          bengaliTitle: '২য় রানার আপ',
-          medal: '🥉 ব্রোঞ্জ মেডেল',
-          crest: '🥉 ২য় রানার আপ ট্রফি',
-          award: 'ব্রোঞ্জ মেডেল ও ট্রফি',
-          badgeBg: '#ffedd5',
-          badgeColor: '#9a3412',
-          border: '#f97316',
-          student: st,
-          scores
-        };
-      }
-    });
-
-    return {
-      className,
-      winners: top3,
-      allStudentsSorted: sortedStudents
-    };
-  });
-
-  const all39Winners = categoryWinnersMap.flatMap(cw => cw.winners);
-
-  // Group A winners (Class 1 - Class 7: 7 categories * 3 = 21 winners)
-  const groupAWinners = categoryWinnersMap
-    .filter(cw => GROUP_A_CLASSES.includes(cw.className))
-    .flatMap(cw => cw.winners);
-
-  // Group B winners (Class 8 - Engineering: 6 categories * 3 = 18 winners)
-  const groupBWinners = categoryWinnersMap
-    .filter(cw => GROUP_B_CLASSES.includes(cw.className))
-    .flatMap(cw => cw.winners);
-
-  // Export 39 Grand Winners to Excel
+  // Export 39 Grand Winners Blank Publication Sheet to Excel
   const handleExportWinnersExcel = () => {
-    const excelData = all39Winners.map((w, idx) => ({
-      'ক্রমিক (SL)': idx + 1,
-      'ক্যাটাগরি (Category)': w.category,
-      'অফিশিয়াল অবস্থান (Position)': `${w.bengaliTitle} (${w.position})`,
-      'রোল আইডি (ID / Roll)': w.student.id,
-      'বিজয়ীর নাম (Winner Name)': w.student.name,
-      'শিক্ষাপ্রতিষ্ঠান (Institution)': w.student.institution || 'N/A',
-      'লিখিত নম্বর (Written /30)': w.scores.written,
-      'ভাইভা নম্বর (Viva /40)': w.scores.viva,
-      'সর্বমোট নম্বর (Total /70)': w.scores.total,
-      'পদক ও ট্রফি (Award)': w.award
-    }));
+    const excelData: any[] = [];
+    let sl = 1;
+    GALA_CLASSES.forEach(className => {
+      [0, 1, 2].forEach(posIndex => {
+        const posTitle = posIndex === 0 ? 'চ্যাম্পিয়ন' : posIndex === 1 ? '১ম রানার আপ' : '২য় রানার আপ';
+        const posEng = posIndex === 0 ? 'Champion' : posIndex === 1 ? '1st Runner Up' : '2nd Runner Up';
+        const award = posIndex === 0 ? 'গোল্ড মেডেল ও চ্যাম্পিয়ন ট্রফি' : posIndex === 1 ? 'সিলভার মেডেল ও ট্রফি' : 'ব্রোঞ্জ মেডেল ও ট্রফি';
+        excelData.push({
+          'ক্রমিক (SL)': sl++,
+          'ক্যাটাগরি (Category)': CLASS_DISPLAY_NAMES[className] || className,
+          'অফিশিয়াল অবস্থান (Position)': `${posTitle} (${posEng})`,
+          'রোল আইডি (ID / Roll)': '',
+          'বিজয়ীর নাম (Winner Name)': '',
+          'শিক্ষাপ্রতিষ্ঠান (Institution)': '',
+          'লিখিত নম্বর (/৩০)': '',
+          'ভাইভা নম্বর (/৪০)': '',
+          'সর্বমোট নম্বর (/৭০)': '',
+          'পদক ও ট্রফি (Award)': award
+        });
+      });
+    });
 
     const ws = XLSX.utils.json_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "39_Gala_Winners");
-    XLSX.writeFile(wb, "ICT_Olympiad_Season3_Official_39_Winners.xlsx");
+    XLSX.utils.book_append_sheet(wb, ws, "39_Gala_Winners_Blank");
+    XLSX.writeFile(wb, "ICT_Olympiad_Season3_Official_39_Winners_Blank_Sheet.xlsx");
   };
 
   // Viva Boards grouping
@@ -2119,7 +2019,7 @@ export default function ResultPage() {
       {/* 7. OFFICIAL 39 GALA WINNERS & AWARDS SHEET */}
       {activeTab === 'winners' && (
         <div id="printable-area">
-          {/* Sub Navigation & Filter Bar (Screen Only) */}
+          {/* Top Header & Summary Bar (Screen Only) */}
           <div className="no-print glass-card" style={{ marginBottom: '1.5rem', padding: '1.25rem 1.5rem', borderLeft: '4px solid #f59e0b' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
               <div>
@@ -2130,12 +2030,12 @@ export default function ResultPage() {
                   </h2>
                 </div>
                 <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  ১৩টি ক্যাটাগরির প্রতিটিতে ৩ জন করে মোট ৩৯ জন শীর্ষ বিজয়ী (চ্যাম্পিয়ন, ১ম রানার আপ ও ২য় রানার আপ)
+                  ১৩টি ক্যাটাগরির প্রতিটিতে ৩ জন করে মোট ৩৯ জন শীর্ষ বিজয়ী (চ্যাম্পিয়ন, ১ম রানার আপ ও ২য় রানার আপ) — A4 সাইজ প্রিন্ট প্রস্তুত অফিসিয়াল খালি শিট
                 </p>
               </div>
 
-              {/* Stat Counters */}
-              <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap' }}>
+              {/* Stat Counters & Excel Download */}
+              <div style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ background: '#fef3c7', border: '1px solid #fde68a', padding: '0.4rem 0.85rem', borderRadius: '0.5rem', textAlign: 'center' }}>
                   <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#92400e' }}>🏆 চ্যাম্পিয়ন</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#b45309' }}>১৩ জন</div>
@@ -2152,184 +2052,19 @@ export default function ResultPage() {
                   <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#1e40af' }}>মোট বিজয়ী</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#1d4ed8' }}>৩৯ জন</div>
                 </div>
-              </div>
-            </div>
-
-            {/* Sub-view Selector */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.25rem', borderTop: '1px solid var(--card-border)', paddingTop: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => setWinnersSubView('sheet')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.4rem',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    border: winnersSubView === 'sheet' ? '2px solid #b45309' : '1px solid var(--primary-border)',
-                    background: winnersSubView === 'sheet' ? '#fef3c7' : 'var(--btn-unselected-bg)',
-                    color: winnersSubView === 'sheet' ? '#92400e' : 'var(--foreground)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}
-                >
-                  <FileText size={16} /> 📄 অফিশিয়াল পাবলিকেশন শিট (A4 Print Ready)
-                </button>
-
-                <button
-                  onClick={() => setWinnersSubView('podium')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.4rem',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    border: winnersSubView === 'podium' ? '2px solid #b45309' : '1px solid var(--primary-border)',
-                    background: winnersSubView === 'podium' ? '#fef3c7' : 'var(--btn-unselected-bg)',
-                    color: winnersSubView === 'podium' ? '#92400e' : 'var(--foreground)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}
-                >
-                  <Trophy size={16} /> 🏆 স্টেজ পোডিয়াম ও কার্ড ভিউ
-                </button>
-
-                <button
-                  onClick={() => setWinnersSubView('entry')}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.4rem',
-                    fontSize: '0.85rem',
-                    fontWeight: 700,
-                    border: winnersSubView === 'entry' ? '2px solid #b45309' : '1px solid var(--primary-border)',
-                    background: winnersSubView === 'entry' ? '#fef3c7' : 'var(--btn-unselected-bg)',
-                    color: winnersSubView === 'entry' ? '#92400e' : 'var(--foreground)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}
-                >
-                  <ClipboardList size={16} /> ✏️ লাইভ মার্কস এন্ট্রি ও স্কোরবোর্ড
-                </button>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                {Object.keys(candidateScores).length > 0 && (
-                  <button
-                    onClick={() => setCandidateScores({})}
-                    style={{
-                      background: 'none',
-                      border: '1px solid #f87171',
-                      color: '#dc2626',
-                      padding: '0.45rem 0.85rem',
-                      borderRadius: '0.4rem',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    🔄 নম্বর রিসেট
-                  </button>
-                )}
                 <button
                   onClick={handleExportWinnersExcel}
                   className="button button-secondary"
-                  style={{ padding: '0.45rem 0.95rem', fontSize: '0.82rem', background: '#d97706', boxShadow: 'none' }}
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.84rem', background: '#d97706', boxShadow: 'none', marginLeft: '0.3rem' }}
                 >
                   <Download size={15} /> ৩৯ বিজয়ী এক্সেল (Excel)
                 </button>
               </div>
             </div>
-
-            {/* Category Filter Pills (Used in Podium and Entry views) */}
-            {winnersSubView !== 'sheet' && (
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--card-border)' }}>
-                <button
-                  onClick={() => setWinnerCategoryFilter('all')}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '2rem',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    border: winnerCategoryFilter === 'all' ? '1.5px solid #b45309' : '1px solid var(--primary-border)',
-                    background: winnerCategoryFilter === 'all' ? '#b45309' : 'var(--btn-unselected-bg)',
-                    color: winnerCategoryFilter === 'all' ? '#fff' : 'var(--foreground)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  সকল ক্যাটাগরি (৩৯ জন)
-                </button>
-                {GALA_CLASSES.map(cls => (
-                  <button
-                    key={cls}
-                    onClick={() => setWinnerCategoryFilter(cls)}
-                    style={{
-                      padding: '0.35rem 0.75rem',
-                      borderRadius: '2rem',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      border: winnerCategoryFilter === cls ? '1.5px solid #004b99' : '1px solid var(--primary-border)',
-                      background: winnerCategoryFilter === cls ? '#004b99' : 'var(--btn-unselected-bg)',
-                      color: winnerCategoryFilter === cls ? '#fff' : 'var(--foreground)',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {cls}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* VIEW 1: OFFICIAL PUBLICATION SHEETS (A4 PRINT READY) */}
-          {/* Always rendered in print mode! On screen when winnersSubView === 'sheet' */}
-          <div className={winnersSubView === 'sheet' ? '' : 'only-print'}>
-            <div className="no-print" style={{ background: '#eff6ff', border: '1px solid #bfdbfe', padding: '0.85rem 1.25rem', borderRadius: '0.5rem', marginBottom: '1.25rem', color: '#1e40af', fontSize: '0.85rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Sparkles size={18} color="#2563eb" />
-                  <span>
-                    <strong>পাবলিকেশন শিট ফরম্যাট:</strong> এটি খালি (ব্ল্যাঙ্ক) রাখা হয়েছে যাতে বিচারক ও কমিটি পরীক্ষার পর হাতে লিখে অফিশিয়ালি ফলাফল প্রকাশ ও স্বাক্ষর করতে পারেন।
-                  </span>
-                </div>
-                <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
-                  <button
-                    onClick={() => setPublicationSheetMode('blank')}
-                    style={{
-                      padding: '0.35rem 0.8rem',
-                      borderRadius: '0.35rem',
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                      border: publicationSheetMode === 'blank' ? '2px solid #004b99' : '1px solid #cbd5e1',
-                      background: publicationSheetMode === 'blank' ? '#004b99' : '#ffffff',
-                      color: publicationSheetMode === 'blank' ? '#ffffff' : '#334155',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    📄 অফিশিয়াল খালি শিট (Default)
-                  </button>
-                  <button
-                    onClick={() => setPublicationSheetMode('filled')}
-                    style={{
-                      padding: '0.35rem 0.8rem',
-                      borderRadius: '0.35rem',
-                      fontSize: '0.78rem',
-                      fontWeight: 800,
-                      border: publicationSheetMode === 'filled' ? '2px solid #004b99' : '1px solid #cbd5e1',
-                      background: publicationSheetMode === 'filled' ? '#004b99' : '#ffffff',
-                      color: publicationSheetMode === 'filled' ? '#ffffff' : '#334155',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    📝 এন্ট্রি করা ডাটা সহ
-                  </button>
-                </div>
-              </div>
-            </div>
-
+          {/* OFFICIAL PUBLICATION SHEETS (A4 PRINT READY) */}
+          <div>
             {/* PAGE 1: GROUP A (CLASS 1 - 7: 21 WINNERS) */}
             <div className="winner-a4-page">
               <div>
@@ -2352,7 +2087,7 @@ export default function ResultPage() {
                   </div>
                 </div>
 
-                {/* Sub-bar with seal */}
+                {/* Sub-bar with info */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '0.25rem 0.6rem', borderRadius: '0.3rem', marginBottom: '0.5rem', fontSize: '0.72rem' }}>
                   <div>
                     <strong>পরীক্ষার তারিখ:</strong> ১৭ নভেম্বর, ২০২৪ | <strong>পূর্ণমান:</strong> লিখিত ৩০ + ভাইভা ৪০ = ৭০ নম্বর
@@ -2365,22 +2100,20 @@ export default function ResultPage() {
                 {/* Results Table (Group A: 21 rows) */}
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem', fontFamily: "'Hind Siliguri', 'Inter', sans-serif" }}>
                   <thead>
-                    <tr style={{ background: '#004b99', color: '#00000', textAlign: 'center' }}>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '9%' }}>ক্যাটাগরি</th>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '14%' }}>অফিশিয়াল অবস্থান</th>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '15%' }}>রোল / আইডি</th>
-                      <th style={{ padding: '0.35rem 0.45rem', border: '1px solid #003366', textAlign: 'left', width: '28%' }}>বিজয়ীর নাম ও শিক্ষাপ্রতিষ্ঠান</th>
+                    <tr style={{ background: '#004b99', color: '#ffffff', textAlign: 'center' }}>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '14%' }}>ক্যাটাগরি</th>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '13%' }}>অফিশিয়াল অবস্থান</th>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '14%' }}>রোল / আইডি</th>
+                      <th style={{ padding: '0.35rem 0.45rem', border: '1px solid #003366', textAlign: 'left', width: '27%' }}>বিজয়ীর নাম ও শিক্ষাপ্রতিষ্ঠান</th>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%' }}>লিখিত</th>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%' }}>ভাইভা</th>
                       <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '7%', background: '#003366' }}>মোট</th>
-                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '13%' }}>পুরস্কার ও পদক</th>
+                      <th style={{ padding: '0.35rem 0.25rem', border: '1px solid #003366', width: '11%' }}>পুরস্কার ও পদক</th>
                     </tr>
                   </thead>
                   <tbody>
                     {GROUP_A_CLASSES.flatMap(className => {
-                      const classWinners = categoryWinnersMap.find(cw => cw.className === className)?.winners || [];
                       return [0, 1, 2].map(posIndex => {
-                        const winnerObj = classWinners[posIndex];
                         const isChamp = posIndex === 0;
                         const is1st = posIndex === 1;
                         const posTitle = isChamp ? 'চ্যাম্পিয়ন' : is1st ? '১ম রানার আপ' : '২য় রানার আপ';
@@ -2399,32 +2132,13 @@ export default function ResultPage() {
                                 {posTitle}
                               </span>
                             </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.72rem', padding: '0.2rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.student.id : ''}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', padding: '0.2rem 0.45rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? (
-                                <>
-                                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.74rem' }}>{winnerObj.student.name}</div>
-                                  {winnerObj.student.institution && (
-                                    <div style={{ fontSize: '0.62rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
-                                      {winnerObj.student.institution}
-                                    </div>
-                                  )}
-                                </>
-                              ) : null}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.2rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.written : ''}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.2rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.viva : ''}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 900, background: isChamp ? '#fef9c3' : '#f1f5f9', color: '#004b99', padding: '0.2rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.total : ''}
-                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.2rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', padding: '0.2rem 0.45rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.2rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.2rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', background: isChamp ? '#fef9c3' : '#f1f5f9', padding: '0.2rem' }}></td>
                             <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '0.66rem', fontWeight: 700, padding: '0.2rem' }}>
-                              {winnerObj?.award || defaultAward}
+                              {defaultAward}
                             </td>
                           </tr>
                         );
@@ -2453,9 +2167,6 @@ export default function ResultPage() {
                     </div>
                   </div>
                 </div>
-                {/* <div style={{ textAlign: 'center', fontSize: '0.62rem', color: '#64748b', marginTop: '0.5rem' }}>
-                  ICT Olympiad Bangladesh Season 3 Gala Grand Finale • Official Awards Gazette • Verified by National Examination Committee
-                </div> */}
               </div>
             </div>
 
@@ -2481,7 +2192,7 @@ export default function ResultPage() {
                   </div>
                 </div>
 
-                {/* Sub-bar with seal */}
+                {/* Sub-bar with info */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8fafc', border: '1px solid #cbd5e1', padding: '0.25rem 0.6rem', borderRadius: '0.3rem', marginBottom: '0.5rem', fontSize: '0.72rem' }}>
                   <div>
                     <strong>পরীক্ষার তারিখ:</strong> ১৭ নভেম্বর, ২০২৪ | <strong>পূর্ণমান:</strong> লিখিত ৩০ + ভাইভা ৪০ = ৭০ নম্বর
@@ -2495,21 +2206,19 @@ export default function ResultPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.74rem', fontFamily: "'Hind Siliguri', 'Inter', sans-serif" }}>
                   <thead>
                     <tr style={{ background: '#004b99', color: '#ffffff', textAlign: 'center' }}>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '11%' }}>ক্যাটাগরি</th>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '14%' }}>অফিশিয়াল অবস্থান</th>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '15%' }}>রোল / আইডি</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '14%' }}>ক্যাটাগরি</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '13%' }}>অফিশিয়াল অবস্থান</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '14%' }}>রোল / আইডি</th>
                       <th style={{ padding: '0.38rem 0.45rem', border: '1px solid #003366', textAlign: 'left', width: '27%' }}>বিজয়ীর নাম ও শিক্ষাপ্রতিষ্ঠান</th>
                       <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%' }}>লিখিত</th>
                       <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%' }}>ভাইভা</th>
                       <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '7%', background: '#003366' }}>মোট</th>
-                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '12%' }}>পুরস্কার ও পদক</th>
+                      <th style={{ padding: '0.38rem 0.25rem', border: '1px solid #003366', width: '11%' }}>পুরস্কার ও পদক</th>
                     </tr>
                   </thead>
                   <tbody>
                     {GROUP_B_CLASSES.flatMap(className => {
-                      const classWinners = categoryWinnersMap.find(cw => cw.className === className)?.winners || [];
                       return [0, 1, 2].map(posIndex => {
-                        const winnerObj = classWinners[posIndex];
                         const isChamp = posIndex === 0;
                         const is1st = posIndex === 1;
                         const posTitle = isChamp ? 'চ্যাম্পিয়ন' : is1st ? '১ম রানার আপ' : '২য় রানার আপ';
@@ -2528,32 +2237,13 @@ export default function ResultPage() {
                                 {posTitle}
                               </span>
                             </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontFamily: 'monospace', fontWeight: 800, fontSize: '0.72rem', padding: '0.24rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.student.id : ''}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', padding: '0.24rem 0.45rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? (
-                                <>
-                                  <div style={{ fontWeight: 800, color: '#0f172a', fontSize: '0.76rem' }}>{winnerObj.student.name}</div>
-                                  {winnerObj.student.institution && (
-                                    <div style={{ fontSize: '0.64rem', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '170px' }}>
-                                      {winnerObj.student.institution}
-                                    </div>
-                                  )}
-                                </>
-                              ) : null}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.24rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.written : ''}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 700, padding: '0.24rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.viva : ''}
-                            </td>
-                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontWeight: 900, background: isChamp ? '#fef9c3' : '#f1f5f9', color: '#004b99', padding: '0.24rem' }}>
-                              {publicationSheetMode === 'filled' && winnerObj ? winnerObj.scores.total : ''}
-                            </td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.24rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', padding: '0.24rem 0.45rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.24rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', padding: '0.24rem' }}></td>
+                            <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', background: isChamp ? '#fef9c3' : '#f1f5f9', padding: '0.24rem' }}></td>
                             <td style={{ border: '1px solid #cbd5e1', textAlign: 'center', fontSize: '0.68rem', fontWeight: 700, padding: '0.24rem' }}>
-                              {winnerObj?.award || defaultAward}
+                              {defaultAward}
                             </td>
                           </tr>
                         );
@@ -2582,251 +2272,9 @@ export default function ResultPage() {
                     </div>
                   </div>
                 </div>
-                {/* <div style={{ textAlign: 'center', fontSize: '0.62rem', color: '#64748b', marginTop: '0.5rem' }}>
-                  ICT Olympiad Bangladesh Season 3 Gala Grand Finale • Official Awards Gazette • Verified by National Examination Committee
-                </div> */}
               </div>
             </div>
           </div>
-
-          {/* VIEW 2: INTERACTIVE STAGE PODIUM VIEW */}
-          {winnersSubView === 'podium' && (
-            <div className="no-print" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {(winnerCategoryFilter === 'all' ? categoryWinnersMap : categoryWinnersMap.filter(c => c.className === winnerCategoryFilter)).map(catItem => {
-                const champ = catItem.winners[0];
-                const runner1 = catItem.winners[1];
-                const runner2 = catItem.winners[2];
-                const classColor = getClassColor(catItem.className);
-
-                return (
-                  <div key={catItem.className} className="glass-card" style={{ padding: '1.5rem', borderTop: `4px solid ${classColor.border}` }}>
-                    {/* Category Title */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px dashed var(--card-border)', paddingBottom: '0.75rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                        <span style={{ background: classColor.badge, color: classColor.text, padding: '0.25rem 0.75rem', borderRadius: '0.4rem', fontWeight: 800, fontSize: '0.9rem' }}>
-                          {catItem.className}
-                        </span>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                          শীর্ষ ৩ জন বিজয়ী (Grand Winners)
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--primary)' }}>
-                        মোট পরীক্ষার্থী: ১০ জন
-                      </div>
-                    </div>
-
-                    {/* 3D Podium Layout */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', alignItems: 'end' }}>
-                      
-                      {/* 2nd Place: 1st Runner Up (Left) */}
-                      {runner1 && (
-                        <div style={{ background: 'linear-gradient(180deg, #f8fafc, #ffffff)', border: '2px solid #cbd5e1', borderRadius: '0.75rem', padding: '1.25rem', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', position: 'relative' }}>
-                          <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#475569', color: '#fff', padding: '0.15rem 0.85rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 800 }}>
-                            🥈 ১ম রানার আপ
-                          </div>
-                          <div style={{ marginTop: '0.5rem', fontSize: '2rem' }}>🥈</div>
-                          <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1e293b', marginTop: '0.25rem' }}>
-                            {runner1.student.name}
-                          </div>
-                          <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.15rem' }}>
-                            {runner1.student.id}
-                          </div>
-                          {runner1.student.institution && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                              {runner1.student.institution}
-                            </div>
-                          )}
-                          <div style={{ marginTop: '0.85rem', background: '#f1f5f9', padding: '0.4rem', borderRadius: '0.4rem', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-around' }}>
-                            <span>লিখিত: <strong>{runner1.scores.written}</strong></span>
-                            <span>ভাইভা: <strong>{runner1.scores.viva}</strong></span>
-                            <span style={{ color: '#004b99', fontWeight: 800 }}>মোট: {runner1.scores.total}</span>
-                          </div>
-                          <div style={{ marginTop: '0.6rem', fontSize: '0.75rem', color: '#475569', fontWeight: 700 }}>
-                            🥈 সিলভার মেডেল ও ট্রফি
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 1st Place: Champion (Center, Elevated) */}
-                      {champ && (
-                        <div style={{ background: 'linear-gradient(180deg, #fefce8, #ffffff)', border: '2.5px solid #f59e0b', borderRadius: '0.75rem', padding: '1.5rem', textAlign: 'center', boxShadow: '0 8px 25px rgba(245, 158, 11, 0.2)', position: 'relative', transform: 'scale(1.02)' }}>
-                          <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg, #f59e0b, #d97706)', color: '#fff', padding: '0.25rem 1.1rem', borderRadius: '1rem', fontSize: '0.82rem', fontWeight: 900, boxShadow: '0 2px 8px rgba(245, 158, 11, 0.4)' }}>
-                            🏆 চ্যাম্পিয়ন (Champion)
-                          </div>
-                          <div style={{ marginTop: '0.5rem', fontSize: '2.75rem' }}>🏆</div>
-                          <div style={{ fontWeight: 900, fontSize: '1.15rem', color: '#b45309', marginTop: '0.25rem' }}>
-                            {champ.student.name}
-                          </div>
-                          <div style={{ fontFamily: 'monospace', fontSize: '0.82rem', color: '#004b99', fontWeight: 800, marginTop: '0.15rem' }}>
-                            {champ.student.id}
-                          </div>
-                          {champ.student.institution && (
-                            <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '0.25rem', fontWeight: 600 }}>
-                              {champ.student.institution}
-                            </div>
-                          )}
-                          <div style={{ marginTop: '1rem', background: '#fef3c7', padding: '0.5rem', borderRadius: '0.4rem', fontSize: '0.82rem', display: 'flex', justifyContent: 'space-around', border: '1px solid #fde68a' }}>
-                            <span>লিখিত: <strong>{champ.scores.written}/30</strong></span>
-                            <span>ভাইভা: <strong>{champ.scores.viva}/40</strong></span>
-                            <span style={{ color: '#b45309', fontWeight: 900 }}>মোট: {champ.scores.total}/70</span>
-                          </div>
-                          <div style={{ marginTop: '0.75rem', fontSize: '0.82rem', color: '#b45309', fontWeight: 800 }}>
-                            🥇 গোল্ড মেডেল ও চ্যাম্পিয়ন ট্রফি
-                          </div>
-                        </div>
-                      )}
-
-                      {/* 3rd Place: 2nd Runner Up (Right) */}
-                      {runner2 && (
-                        <div style={{ background: 'linear-gradient(180deg, #fff7ed, #ffffff)', border: '2px solid #fed7aa', borderRadius: '0.75rem', padding: '1.25rem', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.05)', position: 'relative' }}>
-                          <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#c2410c', color: '#fff', padding: '0.15rem 0.85rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 800 }}>
-                            🥉 ২য় রানার আপ
-                          </div>
-                          <div style={{ marginTop: '0.5rem', fontSize: '2rem' }}>🥉</div>
-                          <div style={{ fontWeight: 800, fontSize: '1rem', color: '#1e293b', marginTop: '0.25rem' }}>
-                            {runner2.student.name}
-                          </div>
-                          <div style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--primary)', fontWeight: 700, marginTop: '0.15rem' }}>
-                            {runner2.student.id}
-                          </div>
-                          {runner2.student.institution && (
-                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                              {runner2.student.institution}
-                            </div>
-                          )}
-                          <div style={{ marginTop: '0.85rem', background: '#ffedd5', padding: '0.4rem', borderRadius: '0.4rem', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-around' }}>
-                            <span>লিখিত: <strong>{runner2.scores.written}</strong></span>
-                            <span>ভাইভা: <strong>{runner2.scores.viva}</strong></span>
-                            <span style={{ color: '#c2410c', fontWeight: 800 }}>মোট: {runner2.scores.total}</span>
-                          </div>
-                          <div style={{ marginTop: '0.6rem', fontSize: '0.75rem', color: '#c2410c', fontWeight: 700 }}>
-                            🥉 ব্রোঞ্জ মেডেল ও ট্রফি
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* VIEW 3: LIVE SCORE ENTRY & SCOREBOARD */}
-          {winnersSubView === 'entry' && (
-            <div className="no-print">
-              <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.25rem', fontSize: '0.85rem', color: '#1e40af' }}>
-                <div style={{ fontWeight: 800, marginBottom: '0.25rem' }}>✏️ লাইভ মার্কস এন্ট্রি ও মূল্যায়ন সহায়িকা:</div>
-                <div>
-                  প্রতিটি পরীক্ষার্থীর লিখিত (সর্বোচ্চ ৩০) ও ভাইভা (সর্বোচ্চ ৪০) নম্বর এখানে সরাসরি পরিবর্তন করতে পারেন। 
-                  নম্বর দেওয়ার সাথে সাথে মোট নম্বর (সর্বোচ্চ ৭০) হিসেব হবে এবং স্বয়ংক্রিয়ভাবে শীর্ষ ৩ জন বিজয়ী নির্বাচিত হয়ে পোডিয়াম, পাবলিকেশন শিট ও এক্সেল ফাইলে যুক্ত হয়ে যাবে।
-                </div>
-              </div>
-
-              {(winnerCategoryFilter === 'all' ? categoryWinnersMap : categoryWinnersMap.filter(c => c.className === winnerCategoryFilter)).map(catItem => {
-                const classColor = getClassColor(catItem.className);
-                return (
-                  <div key={catItem.className} className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem', borderTop: `4px solid ${classColor.border}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ background: classColor.badge, color: classColor.text, padding: '0.2rem 0.65rem', borderRadius: '0.35rem', fontWeight: 800, fontSize: '0.85rem' }}>
-                          {catItem.className}
-                        </span>
-                        <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                          (১০ জন প্রতিযোগী)
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                        শীর্ষ ৩ জন গালা বিজয়ী হিসেবে তালিকাভুক্ত হবে
-                      </div>
-                    </div>
-
-                    <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                        <thead>
-                          <tr style={{ background: 'var(--input-bg)', borderBottom: '2px solid var(--primary-border)', textAlign: 'left' }}>
-                            <th style={{ padding: '0.5rem', width: '5%', textAlign: 'center' }}>র‍্যাঙ্ক</th>
-                            <th style={{ padding: '0.5rem', width: '12%', textAlign: 'center' }}>রোল আইডি</th>
-                            <th style={{ padding: '0.5rem', width: '25%' }}>নাম ও শিক্ষাপ্রতিষ্ঠান</th>
-                            <th style={{ padding: '0.5rem', width: '15%', textAlign: 'center' }}>লিখিত নম্বর (/৩০)</th>
-                            <th style={{ padding: '0.5rem', width: '15%', textAlign: 'center' }}>ভাইভা নম্বর (/৪০)</th>
-                            <th style={{ padding: '0.5rem', width: '12%', textAlign: 'center' }}>মোট নম্বর (/৭০)</th>
-                            <th style={{ padding: '0.5rem', width: '16%', textAlign: 'center' }}>ফাইনাল স্ট্যাটাস</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {catItem.allStudentsSorted.map((st, idx) => {
-                            const sc = getCandidateScore(st);
-                            const isChamp = idx === 0;
-                            const is1st = idx === 1;
-                            const is2nd = idx === 2;
-
-                            return (
-                              <tr key={st.id} style={{ borderBottom: '1px solid var(--card-border)', background: isChamp ? '#fefce8' : is1st ? '#f8fafc' : is2nd ? '#fff7ed' : 'transparent' }}>
-                                <td style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 800, color: isChamp ? '#b45309' : 'var(--foreground)' }}>
-                                  #{idx + 1}
-                                </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'center', fontFamily: 'monospace', fontWeight: 700 }}>
-                                  {st.id}
-                                </td>
-                                <td style={{ padding: '0.5rem' }}>
-                                  <div style={{ fontWeight: 700 }}>{st.name}</div>
-                                  {st.institution && (
-                                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{st.institution}</div>
-                                  )}
-                                </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    max={30}
-                                    value={sc.written}
-                                    onChange={e => handleScoreChange(st.id, 'written', parseInt(e.target.value, 10))}
-                                    style={{ width: '65px', padding: '0.25rem 0.4rem', textAlign: 'center', borderRadius: '0.3rem', border: '1px solid var(--primary-border)', background: 'var(--card-bg)', color: 'var(--foreground)', fontWeight: 700 }}
-                                  />
-                                </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                                  <input
-                                    type="number"
-                                    min={0}
-                                    max={40}
-                                    value={sc.viva}
-                                    onChange={e => handleScoreChange(st.id, 'viva', parseInt(e.target.value, 10))}
-                                    style={{ width: '65px', padding: '0.25rem 0.4rem', textAlign: 'center', borderRadius: '0.3rem', border: '1px solid var(--primary-border)', background: 'var(--card-bg)', color: 'var(--foreground)', fontWeight: 700 }}
-                                  />
-                                </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'center', fontWeight: 900, color: isChamp ? '#b45309' : '#004b99' }}>
-                                  {sc.total} / 70
-                                </td>
-                                <td style={{ padding: '0.5rem', textAlign: 'center' }}>
-                                  {isChamp ? (
-                                    <span style={{ background: '#fef08a', color: '#854d0e', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.74rem', fontWeight: 800 }}>
-                                      🏆 চ্যাম্পিয়ন
-                                    </span>
-                                  ) : is1st ? (
-                                    <span style={{ background: '#e2e8f0', color: '#334155', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.74rem', fontWeight: 800 }}>
-                                      🥈 ১ম রানার আপ
-                                    </span>
-                                  ) : is2nd ? (
-                                    <span style={{ background: '#fed7aa', color: '#9a3412', padding: '0.2rem 0.5rem', borderRadius: '0.3rem', fontSize: '0.74rem', fontWeight: 800 }}>
-                                      🥉 ২য় রানার আপ
-                                    </span>
-                                  ) : (
-                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
-                                      অংশগ্রহণকারী
-                                    </span>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
         </div>
       )}
 
