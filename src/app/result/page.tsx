@@ -163,9 +163,9 @@ export default function ResultPage() {
             </Link>
             
             {/* Logo Badge in Navbar */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', padding: '0.3rem 0.6rem', borderRadius: '0.5rem', border: '1px solid var(--primary-border)' }}>
-              <img src="/logo/logo.png" alt="Logo" style={{ height: '26px', width: 'auto' }} />
-              <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '28px', width: 'auto', maxWidth: '85px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', background: '#ffffff', padding: '0.35rem 0.75rem', borderRadius: '0.5rem', border: '1px solid var(--primary-border)' }}>
+              <img src="/logo/logo.png" alt="Logo" style={{ height: '30px', width: 'auto' }} />
+              <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '42px', width: 'auto' }} />
             </div>
 
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--primary)' }}>
@@ -439,13 +439,13 @@ export default function ResultPage() {
                             paddingBottom: '0.4rem',
                             marginBottom: '0.4rem'
                           }}>
-                            <img src="/logo/logo.png" alt="Logo" style={{ height: '24px', width: 'auto', objectFit: 'contain' }} />
+                            <img src="/logo/logo.png" alt="Logo" style={{ height: '26px', width: 'auto', objectFit: 'contain' }} />
                             <div style={{ textAlign: 'center' }}>
-                              <span style={{ fontSize: '0.62rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                              <span style={{ fontSize: '0.65rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                 GALA ROUND 2026
                               </span>
                             </div>
-                            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '26px', width: 'auto', maxWidth: '80px', objectFit: 'contain' }} />
+                            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '42px', width: 'auto', objectFit: 'contain' }} />
                           </div>
 
                           {/* Candidate Identity */}
@@ -576,16 +576,16 @@ export default function ResultPage() {
                             <img 
                               src="/logo/logo.png" 
                               alt="Logo" 
-                              style={{ height: '42px', width: 'auto', maxWidth: '140px', objectFit: 'contain' }} 
+                              style={{ height: '48px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} 
                             />
                           </div>
 
                           {/* Center Institution Info */}
                           <div style={{ textAlign: 'center', flexGrow: 1 }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#004b99', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#004b99', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                               ICT OLYMPIAD BANGLADESH
                             </h2>
-                            <div style={{ fontSize: '0.85rem', color: '#0284c7', fontWeight: 800, marginTop: '0.1rem' }}>
+                            <div style={{ fontSize: '0.88rem', color: '#0284c7', fontWeight: 800, marginTop: '0.1rem' }}>
                               SEASON 3 GALA ROUND • GRAND FINALE 2026
                             </div>
                             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
@@ -594,11 +594,11 @@ export default function ResultPage() {
                           </div>
 
                           {/* Tagline Graphic */}
-                          <div style={{ background: '#ffffff', padding: '3px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', flexShrink: 0 }}>
+                          <div style={{ background: '#ffffff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', flexShrink: 0 }}>
                             <img 
                               src="/logo/tagline_1.png" 
                               alt="Tagline" 
-                              style={{ height: '44px', width: 'auto', maxWidth: '120px', objectFit: 'contain' }} 
+                              style={{ height: '72px', width: 'auto', objectFit: 'contain' }} 
                             />
                           </div>
 
@@ -952,7 +952,7 @@ export default function ResultPage() {
         <div id="printable-area" style={{ background: '#fff', padding: '2rem', borderRadius: '0.5rem', border: '2px solid #004b99' }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #004b99', paddingBottom: '1rem', marginBottom: '1.5rem', gap: '1rem' }}>
-            <img src="/logo/logo.png" alt="Logo" style={{ height: '42px', width: 'auto' }} />
+            <img src="/logo/logo.png" alt="Logo" style={{ height: '46px', width: 'auto' }} />
             <div style={{ textAlign: 'center', flexGrow: 1 }}>
               <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#004b99', margin: 0 }}>
                 ICT OLYMPIAD BANGLADESH - SEASON 3
@@ -964,7 +964,7 @@ export default function ResultPage() {
                 পরীক্ষার সময়কাল: সকাল ০৯:০০ AM - ১১:০০ AM (প্যারালাল সেশন)
               </div>
             </div>
-            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '45px', width: 'auto', maxWidth: '130px' }} />
+            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '70px', width: 'auto', objectFit: 'contain' }} />
           </div>
 
           {/* Section 1: Written Examination Halls */}
@@ -1093,7 +1093,7 @@ export default function ResultPage() {
               >
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #004b99', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '1rem' }}>
-                  <img src="/logo/logo.png" alt="Logo" style={{ height: '36px', width: 'auto' }} />
+                  <img src="/logo/logo.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
                   <div style={{ textAlign: 'center', flexGrow: 1 }}>
                     <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
                       ICT OLYMPIAD BANGLADESH - SEASON 3
@@ -1105,7 +1105,7 @@ export default function ResultPage() {
                       GALA ROUND 2026 • ROOM {roomName}
                     </div>
                   </div>
-                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '40px', width: 'auto', maxWidth: '110px' }} />
+                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '65px', width: 'auto', objectFit: 'contain' }} />
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.82rem', color: '#444' }}>
@@ -1179,7 +1179,7 @@ export default function ResultPage() {
               >
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2.5px solid #ea580c', paddingBottom: '0.85rem', marginBottom: '1rem', gap: '1rem' }}>
-                  <img src="/logo/logo.png" alt="Logo" style={{ height: '36px', width: 'auto' }} />
+                  <img src="/logo/logo.png" alt="Logo" style={{ height: '40px', width: 'auto' }} />
                   <div style={{ textAlign: 'center', flexGrow: 1 }}>
                     <div style={{ fontSize: '1.2rem', fontWeight: 900, color: '#004b99', textTransform: 'uppercase' }}>
                       ICT OLYMPIAD BANGLADESH - SEASON 3
@@ -1191,7 +1191,7 @@ export default function ResultPage() {
                       {boardName} ({boardCandidates[0]?.vivaRoom || 'Room 103'}) • Total Candidates: {boardCandidates.length}
                     </div>
                   </div>
-                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '40px', width: 'auto', maxWidth: '110px' }} />
+                  <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '65px', width: 'auto', objectFit: 'contain' }} />
                 </div>
 
                 <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000', fontSize: '0.82rem' }}>

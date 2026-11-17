@@ -75,10 +75,10 @@ export default function Dashboard() {
       <header className="glass-card" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', padding: '1.25rem 1.75rem', borderTop: '4px solid var(--primary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
           {/* Main Logo & Tagline Displays */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', background: '#ffffff', padding: '0.45rem 0.85rem', borderRadius: '0.6rem', border: '1.5px solid var(--primary-border)', boxShadow: '0 2px 8px rgba(0, 75, 153, 0.1)' }}>
-            <img src="/logo/logo.png" alt="ICT Olympiad Bangladesh Logo" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
-            <div style={{ width: '1px', height: '32px', background: 'var(--primary-border)' }} />
-            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '42px', width: 'auto', maxWidth: '135px', objectFit: 'contain' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#ffffff', padding: '0.55rem 1.1rem', borderRadius: '0.6rem', border: '1.5px solid var(--primary-border)', boxShadow: '0 2px 8px rgba(0, 75, 153, 0.1)' }}>
+            <img src="/logo/logo.png" alt="ICT Olympiad Bangladesh Logo" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+            <div style={{ width: '1.5px', height: '52px', background: 'var(--primary-border)' }} />
+            <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '62px', width: 'auto', objectFit: 'contain' }} />
           </div>
 
           <div>
@@ -210,10 +210,10 @@ export default function Dashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', alignItems: 'center', paddingTop: '1rem', borderTop: '1px dashed var(--primary-border)' }}>
           {/* Logo & Tagline Status */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#ffffff', padding: '0.35rem 0.65rem', borderRadius: '0.5rem', border: '1.5px solid var(--primary-border)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-              <img src="/logo/logo.png" alt="Logo" style={{ height: '28px', width: 'auto' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#ffffff', padding: '0.45rem 0.85rem', borderRadius: '0.5rem', border: '1.5px solid var(--primary-border)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+              <img src="/logo/logo.png" alt="Logo" style={{ height: '32px', width: 'auto' }} />
               <span style={{ color: 'var(--primary-border)' }}>•</span>
-              <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '32px', width: 'auto', maxWidth: '100px' }} />
+              <img src="/logo/tagline_1.png" alt="Tagline" style={{ height: '50px', width: 'auto' }} />
             </div>
             <div>
               <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
