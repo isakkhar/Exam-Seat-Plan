@@ -1,36 +1,59 @@
-# Exam Seat Plan & Admit Card Maker
+# ICT Olympiad Bangladesh — Season 3 Gala Round Exam & Seat Plan System
 
-A modern, institutional web-based application built with **Next.js 16** to plan, manage, generate, and print exam seat arrangements and official admit cards. Designed with a clean, professional **Deep Purple theme**, this tool is ideal for schools, colleges, and examination centers.
+A premier, web-based examination management, seat allocation, and admit card generation system built with **Next.js 16** for the **ICT Olympiad Bangladesh — Season 3 Gala Round**. Styled with the official **ICT Olympiad Bangladesh tech brand identity** (Deep Tech Blue `#004B99`, Digital Cyan `#00A3E0`, and Accent Gold/Orange `#FF7A00`).
 
 ---
 
-## ✨ Features
+## ✨ Gala Round Features & Architecture
 
-- **Classroom Bench Grid (১ জন / বেঞ্চ)**:
-  - Configure rooms with **Rows** and **Columns** (bench layout).
-  - Single-student-per-bench rule with automatically computed capacity and distinct seat codes (`R1-C1`, `R1-C2`...).
-- **Room-wise Class Mapping**:
-  - Assign specific classes to specific rooms or choose **"All Classes"**.
-- **Anti-Cheating Seating Patterns**:
-  - Choose between **Snake / Zig-zag order**, **Column-wise**, or **Row-wise** distribution to ensure students of the same class never sit side-by-side.
-- **Interactive Manual Seat Swap**:
-  - In the Visual Classroom Map, click any two desks to immediately swap student seat positions.
-- **5 Print-Ready A4 Document Views**:
-  1. **Seat Slips (3x3 Grid)**: 9 desk sticker slips per A4 page with student info, institution logo, room, and seat code.
-  2. **Admit Cards (প্রবেশপত্র)**: Official printable admit cards with candidate photo placeholder, rules, student details, and signature zones.
-  3. **Visual Classroom Map**: Classroom diagram with podium/blackboard and color-coded class badges.
-  4. **Notice Board Summary**: Clean summary table for the examination notice board with roll ranges and class breakdown.
-  5. **Attendance & Signature Sheet**: Invigilator attendance sheet with student signature and answer script number columns.
-- **Real-Time Student Search**:
-  - Instant live filter by Roll/ID, student name, or class.
-- **Excel Export (.xlsx)**:
-  - One-click full seat allocation export in Excel format.
-- **Institutional Branding**:
-  - Set custom institution name and upload your own school/college logo directly from the browser.
-- **Smart Column Detection**:
-  - Upload CSV or Excel files with flexible header names (e.g. `Roll`, `ID`, `Student Name`, `Class`, `Grade`).
-- **Capacity Alerts**:
-  - Visual indicator warning of seat shortages or reporting surplus empty seats.
+### 1. 13 National Categories (130 Candidates)
+- **Pre-configured Preset**: 1-click loading of 130 candidates across all 13 official Gala categories:
+  1. Class 1
+  2. Class 2
+  3. Class 3
+  4. Class 4
+  5. Class 5
+  6. Class 6
+  7. Class 7
+  8. Class 8
+  9. Class 9/10
+  10. Class 11/12
+  11. Polytechnic (পলিটেকনিক)
+  12. Non-Engineering (নন-ইঞ্জিনিয়ারিং)
+  13. Engineering (ইঞ্জিনিয়ারিং)
+- Custom upload support via `.xlsx` or `.csv` with auto-column detection (`ID/Roll`, `Name`, `Class`).
+
+### 2. Parallel Examination Pipeline (09:00 AM – 11:00 AM)
+Ensures zero crowding and maximum efficiency with 5 examination rooms (40 single chairs each = 200 capacity):
+- **Group A (70 Candidates - Class 1 to 7)**:
+  - **Slot 1 (09:00 AM - 09:50 AM)**: Written Exam (Room 101 & Room 102, 35 candidates/room).
+  - **Break & Swap (09:50 AM - 10:05 AM)**: 15-minute room changeover.
+  - **Slot 2 (10:05 AM - 10:55 AM)**: Viva Voce across 5 Viva Boards (Room 103, 104, 105).
+- **Group B (60 Candidates - Class 8 to Engineering)**:
+  - **Slot 1 (09:00 AM - 09:50 AM)**: Viva Voce across 5 Viva Boards (Room 103, 104, 105).
+  - **Break & Swap (09:50 AM - 10:05 AM)**: 15-minute room changeover.
+  - **Slot 2 (10:05 AM - 10:55 AM)**: Written Exam (Room 101 & Room 102, 30 candidates/room).
+
+### 3. Comprehensive Print-Ready Document Views (A4 Portrait)
+1. **🏷️ Dual Seat Slips (3x3 Grid)**:
+   - 9 desk sticker slips per A4 page with cutting guide margins.
+   - Shows both Written Hall/Seat + Viva Room/Board/Token for each candidate.
+2. **🪪 Modernized Gala Admit Cards (2 per Page)**:
+   - Official ICT Olympiad Bangladesh branded frame with dual logos.
+   - Passport photo affix box, candidate identity, and Parallel Schedule Matrix table.
+   - Instructions and signatures of Convener & Controller of Examinations.
+3. **🪑 Visual Classroom Map (Single Chair Grid)**:
+   - Front blackboard/podium with seat grid (8 rows × 5 cols).
+   - Slot 1 / Slot 2 selector and live interactive seat swapping.
+4. **🚪 Door Notice & Directory**:
+   - Written halls (Room 101, 102) roll ranges and seating capacity.
+   - Viva halls (Room 103, 104, 105) candidate queue list with tokens.
+5. **📝 Written Attendance Sheet**:
+   - Formal invigilator attendance sheets with candidate signature and script number boxes.
+6. **⚖️ Judges Viva Evaluation Sheet**:
+   - Scoring rubric per board (Presentation: 10, Technical Knowledge: 15, Problem Solving: 15, Total: 40).
+7. **📊 Excel Export**:
+   - Full `.xlsx` data export of all 130 candidates with their written seats and viva tokens.
 
 ---
 
@@ -38,15 +61,13 @@ A modern, institutional web-based application built with **Next.js 16** to plan,
 
 ### 1. Installation
 
-Clone the repository and install dependencies:
-
 ```bash
 npm install
 ```
 
 ### 2. Running Locally
 
-Start the Next.js development server:
+Start the Next.js development server (Webpack is enabled for Windows compatibility):
 
 ```bash
 npm run dev
@@ -56,25 +77,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## 📋 Quick Usage Guide
-
-1. **Setup Institution & Exam**: Enter institution name, exam title, subject, and date on the dashboard. Optionally upload your institution logo.
-2. **Configure Rooms**: Add exam halls by specifying room name, number of rows, and columns (1 student per bench). Select allowed classes for each room.
-3. **Upload Student List**: Upload your student list via `.xlsx` or `.csv` (Columns: `Roll/ID, Name, Class`).
-4. **Choose Seating Pattern**: Select Snake/Zig-zag order, Column-wise, or Row-wise.
-5. **Generate**: Click **"Generate Seat Plan & Admit Cards"**.
-6. **Print & Export**:
-   - Switch between **Seat Slips**, **Admit Cards**, **Classroom Map**, **Notice Board**, or **Attendance Sheet**.
-   - Click **"Print Current View"** (Recommended print settings: Layout = **Portrait**, Margins = **None / Default**).
-   - Click **"Export Excel"** for a complete spreadsheet.
-
----
-
 ## 🛠️ Tech Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript
-- **Styling**: Modern Teal CSS Theme with Glassmorphism
+- **Styling**: ICT Olympiad Bangladesh Tech Theme (`globals.css`)
 - **Icons**: Lucide React
 - **Data Parsing & Export**: XLSX
 - **Persistence**: LocalStorage
