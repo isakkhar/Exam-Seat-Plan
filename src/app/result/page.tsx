@@ -578,7 +578,7 @@ export default function ResultPage() {
       )}
 
       {/* ========================================================= */}
-      {/* 2. ADMIT CARD (Modern Gala Round Edition - 2 per Page)    */}
+      {/* 2. ADMIT CARD (Modern Gala Round Edition - 2 per A4 Page) */}
       {/* ========================================================= */}
       {activeTab === 'admit' && (
         <div id="printable-area">
@@ -588,94 +588,129 @@ export default function ResultPage() {
             return admitPairs.map((pair, pIdx) => (
               <div 
                 key={`admit-page-${pIdx}`} 
-                className={pIdx > 0 ? "print-page-break" : ""}
-                style={{ marginBottom: '2.5rem' }}
+                className={`admit-a4-page ${pIdx > 0 ? "print-page-break" : ""}`}
+                style={{ 
+                  width: '100%',
+                  maxWidth: '200mm',
+                  height: '280mm',
+                  maxHeight: '280mm',
+                  margin: '0 auto 2.5rem auto',
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  justifyContent: 'space-between',
+                  boxSizing: 'border-box'
+                }}
               >
-                <div style={{ maxWidth: '210mm', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.2cm', minHeight: '27.7cm', justifyContent: 'center' }}>
-                  {pair.map((student) => {
-                    const colStyle = getClassColor(student.className);
+                {pair.map((student, sIndex) => {
+                  const colStyle = getClassColor(student.className);
 
-                    return (
+                  return (
+                    <React.Fragment key={student.id}>
+                      {sIndex > 0 && (
+                        <div 
+                          className="admit-cut-line"
+                          style={{ 
+                            height: '6mm', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center', 
+                            fontSize: '0.65rem', 
+                            color: '#94a3b8', 
+                            gap: '0.5rem',
+                            userSelect: 'none'
+                          }}
+                        >
+                          <span style={{ borderTop: '1px dashed #cbd5e1', flexGrow: 1 }} />
+                          <span>✂️ কাটার দাগ (Cut Here for 2nd Admit Card) ✂️</span>
+                          <span style={{ borderTop: '1px dashed #cbd5e1', flexGrow: 1 }} />
+                        </div>
+                      )}
+
                       <div 
-                        key={student.id} 
                         style={{ 
-                          border: '2.5px solid #004b99', 
-                          borderRadius: '0.75rem', 
-                          padding: '1.25rem 1.5rem', 
+                          border: '2px solid #004b99', 
+                          borderRadius: '0.5rem', 
+                          padding: '0.45rem 0.8rem', 
                           background: '#ffffff',
                           position: 'relative',
-                          boxShadow: '0 4px 16px rgba(0, 75, 153, 0.12)',
-                          boxSizing: 'border-box'
+                          boxShadow: '0 2px 10px rgba(0, 75, 153, 0.08)',
+                          boxSizing: 'border-box',
+                          height: '136mm',
+                          maxHeight: '136mm',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
                         }}
                       >
                         {/* Top Decorative Color Bar */}
-                        <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: '4px', background: 'linear-gradient(to right, #004b99, #00a3e0, #ff7a00)', borderBottomLeftRadius: '4px', borderBottomRightRadius: '4px' }} />
+                        <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: '3px', background: 'linear-gradient(to right, #004b99, #00a3e0, #ff7a00)', borderBottomLeftRadius: '3px', borderBottomRightRadius: '3px' }} />
 
                         {/* Top Header with Dual Logos & Photo Box */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #004b99', paddingBottom: '0.75rem', marginBottom: '0.85rem', gap: '1rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1.5px solid #004b99', paddingBottom: '0.35rem', marginBottom: '0.3rem', gap: '0.6rem' }}>
                           {/* Main Logo */}
-                          <div style={{ background: '#ffffff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', flexShrink: 0 }}>
+                          <div style={{ background: '#ffffff', padding: '2px 5px', borderRadius: '4px', border: '1px solid #bfdbfe', flexShrink: 0 }}>
                             <img 
                               src="/logo/logo.png" 
                               alt="Logo" 
-                              style={{ height: '48px', width: 'auto', maxWidth: '160px', objectFit: 'contain' }} 
+                              style={{ height: '34px', width: 'auto', maxWidth: '130px', objectFit: 'contain' }} 
                             />
                           </div>
 
                           {/* Center Institution Info */}
                           <div style={{ textAlign: 'center', flexGrow: 1 }}>
-                            <h2 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#004b99', margin: 0, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            <h2 style={{ fontSize: '1.05rem', fontWeight: 900, color: '#004b99', margin: 0, textTransform: 'uppercase', letterSpacing: '0.3px', lineHeight: '1.1' }}>
                               ICT OLYMPIAD BANGLADESH
                             </h2>
-                            <div style={{ fontSize: '0.88rem', color: '#0284c7', fontWeight: 800, marginTop: '0.1rem' }}>
+                            <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 800, marginTop: '0.1rem' }}>
                               SEASON 3 GALA ROUND • GRAND FINALE 2026
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                            <div style={{ fontSize: '0.62rem', color: '#64748b' }}>
                               National Technology & Coding Olympiad
                             </div>
                           </div>
 
                           {/* Tagline Graphic */}
-                          <div style={{ background: '#ffffff', padding: '4px 8px', borderRadius: '6px', border: '1px solid #bfdbfe', flexShrink: 0 }}>
+                          <div style={{ background: '#ffffff', padding: '2px 5px', borderRadius: '4px', border: '1px solid #bfdbfe', flexShrink: 0 }}>
                             <img 
                               src="/logo/tagline_1.png" 
                               alt="Tagline" 
-                              style={{ height: '72px', width: 'auto', objectFit: 'contain' }} 
+                              style={{ height: '50px', width: 'auto', objectFit: 'contain' }} 
                             />
                           </div>
 
                           {/* Candidate Photo Box */}
                           <div style={{ 
-                            width: '75px', 
-                            height: '90px', 
-                            border: '1.5px dashed #004b99', 
-                            borderRadius: '0.35rem', 
+                            width: '56px', 
+                            height: '66px', 
+                            border: '1.2px dashed #004b99', 
+                            borderRadius: '0.25rem', 
                             display: 'flex', 
                             flexDirection: 'column',
                             alignItems: 'center', 
                             justifyContent: 'center', 
                             textAlign: 'center',
-                            fontSize: '0.62rem',
+                            fontSize: '0.52rem',
                             color: '#004b99',
                             background: '#f4f8fc',
-                            padding: '0.2rem',
-                            flexShrink: 0
+                            padding: '0.15rem',
+                            flexShrink: 0,
+                            lineHeight: '1.1'
                           }}>
                             <span>Affix Passport Size Photo</span>
                           </div>
                         </div>
 
                         {/* Admit Card Badge Ribbon */}
-                        <div style={{ textAlign: 'center', marginTop: '-1.45rem', marginBottom: '0.75rem' }}>
+                        <div style={{ textAlign: 'center', marginTop: '-0.7rem', marginBottom: '0.3rem' }}>
                           <span style={{ 
                             background: 'linear-gradient(135deg, #004b99, #0284c7)', 
                             color: '#ffffff', 
-                            padding: '0.3rem 1.6rem', 
+                            padding: '0.15rem 1.1rem', 
                             borderRadius: '1rem', 
                             fontWeight: 900, 
-                            fontSize: '0.85rem', 
-                            letterSpacing: '0.6px', 
-                            boxShadow: '0 2px 6px rgba(0,75,153,0.3)',
+                            fontSize: '0.72rem', 
+                            letterSpacing: '0.5px', 
+                            boxShadow: '0 1px 4px rgba(0,75,153,0.25)',
                             border: '1px solid #ffffff'
                           }}>
                             OFFICIAL ADMIT CARD • প্রবেশপত্র
@@ -686,88 +721,90 @@ export default function ResultPage() {
                         <div style={{ 
                           display: 'grid', 
                           gridTemplateColumns: 'repeat(4, 1fr)', 
-                          gap: '0.6rem', 
+                          gap: '0.25rem 0.5rem', 
                           background: '#f4f8fc', 
-                          padding: '0.85rem', 
-                          borderRadius: '0.5rem', 
+                          padding: '0.4rem 0.6rem', 
+                          borderRadius: '0.35rem', 
                           border: '1px solid #bfdbfe', 
-                          marginBottom: '0.75rem', 
-                          fontSize: '0.88rem' 
+                          marginBottom: '0.3rem', 
+                          fontSize: '0.76rem' 
                         }}>
                           <div style={{ gridColumn: 'span 2' }}>
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Candidate Full Name:</span>
-                            <strong style={{ color: '#0b1a30', fontSize: '1.05rem' }}>{student.name}</strong>
+                            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', lineHeight: '1' }}>Candidate Full Name:</span>
+                            <strong style={{ color: '#0b1a30', fontSize: '0.92rem' }}>{student.name}</strong>
                           </div>
                           <div>
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Candidate ID / Roll:</span>
-                            <strong style={{ color: '#004b99', fontFamily: 'monospace', fontSize: '1rem' }}>{student.id}</strong>
+                            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', lineHeight: '1' }}>Candidate ID / Roll:</span>
+                            <strong style={{ color: '#004b99', fontFamily: 'monospace', fontSize: '0.88rem' }}>{student.id}</strong>
                           </div>
                           <div>
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Exam Group:</span>
-                            <strong style={{ color: '#ff7a00', fontSize: '0.95rem' }}>{student.group || 'Group A'}</strong>
+                            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', lineHeight: '1' }}>Exam Group:</span>
+                            <strong style={{ color: '#ff7a00', fontSize: '0.85rem' }}>{student.group || 'Group A'}</strong>
                           </div>
                           <div style={{ gridColumn: 'span 2' }}>
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Category / Class:</span>
+                            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', lineHeight: '1' }}>Category / Class:</span>
                             <span style={{ color: colStyle.text, fontWeight: 800 }}>{student.className}</span>
                             {student.rank && (
-                              <span style={{ marginLeft: '0.5rem', background: '#dbeafe', color: '#004b99', fontSize: '0.72rem', padding: '0.1rem 0.45rem', borderRadius: '0.25rem', fontWeight: 700 }}>
+                              <span style={{ marginLeft: '0.4rem', background: '#dbeafe', color: '#004b99', fontSize: '0.65rem', padding: '0.05rem 0.35rem', borderRadius: '0.2rem', fontWeight: 700 }}>
                                 Gala Rank: #{student.rank}
                               </span>
                             )}
                           </div>
                           <div style={{ gridColumn: 'span 2' }}>
-                            <span style={{ color: '#64748b', fontSize: '0.75rem', display: 'block' }}>Institution / School:</span>
-                            <strong style={{ color: '#0b1a30', fontSize: '0.88rem' }}>{student.institution || 'ICT Olympiad Bangladesh'}</strong>
+                            <span style={{ color: '#64748b', fontSize: '0.65rem', display: 'block', lineHeight: '1' }}>Institution / School:</span>
+                            <strong style={{ color: '#0b1a30', fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
+                              {student.institution || 'ICT Olympiad Bangladesh'}
+                            </strong>
                           </div>
                         </div>
 
                         {/* Parallel Exam Schedule Matrix Box */}
-                        <div style={{ marginBottom: '0.75rem' }}>
-                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', margin: 0 }}>
+                        <div style={{ marginBottom: '0.3rem' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.72rem', margin: 0 }}>
                             <thead>
                               <tr style={{ background: '#004b99', color: '#ffffff' }}>
-                                <th style={{ padding: '0.4rem 0.6rem', border: '1px solid #004b99', textAlign: 'left', color: '#fff' }}>পরীক্ষার ধাপ (Stage)</th>
-                                <th style={{ padding: '0.4rem 0.6rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>ভেন্যু / হল</th>
-                                <th style={{ padding: '0.4rem 0.6rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>সিট / বোর্ড নং</th>
-                                <th style={{ padding: '0.4rem 0.6rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>উপস্থিতির সময়</th>
-                                <th style={{ padding: '0.4rem 0.6rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>পরীক্ষার সময়কাল</th>
+                                <th style={{ padding: '0.25rem 0.45rem', border: '1px solid #004b99', textAlign: 'left', color: '#fff' }}>পরীক্ষার ধাপ (Stage)</th>
+                                <th style={{ padding: '0.25rem 0.45rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>ভেন্যু / হল</th>
+                                <th style={{ padding: '0.25rem 0.45rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>সিট / বোর্ড নং</th>
+                                <th style={{ padding: '0.25rem 0.45rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>উপস্থিতির সময়</th>
+                                <th style={{ padding: '0.25rem 0.45rem', border: '1px solid #004b99', textAlign: 'center', color: '#fff' }}>পরীক্ষার সময়কাল</th>
                               </tr>
                             </thead>
                             <tbody>
                               {/* Written Row */}
                               <tr style={{ background: '#eff6ff' }}>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #bfdbfe', fontWeight: 800, color: '#004b99' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #bfdbfe', fontWeight: 800, color: '#004b99' }}>
                                   📝 লিখিত পরীক্ষা (Written Exam)
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, color: '#004b99' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, color: '#004b99' }}>
                                   {student.writtenRoom || 'Room 101'}
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, color: '#0284c7' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800, color: '#0284c7' }}>
                                   {student.writtenSeat || student.seatNumber}
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #bfdbfe', textAlign: 'center' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #bfdbfe', textAlign: 'center' }}>
                                   {student.group === 'Group A' ? '০৮:৪৫ AM' : '০৯:৫০ AM'}
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800 }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #bfdbfe', textAlign: 'center', fontWeight: 800 }}>
                                   {student.writtenSlot || '09:00 AM - 09:50 AM'}
                                 </td>
                               </tr>
 
                               {/* Viva Row */}
                               <tr style={{ background: '#fff7ed' }}>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #fed7aa', fontWeight: 800, color: '#c2410c' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #fed7aa', fontWeight: 800, color: '#c2410c' }}>
                                   🎤 মৌখিক / ভাইভা (Viva Voce)
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, color: '#c2410c' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, color: '#c2410c' }}>
                                   {student.vivaRoom || 'Room 103'}
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, color: '#ea580c' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800, color: '#ea580c' }}>
                                   {student.vivaBoard} (টোকেন #{student.vivaToken})
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #fed7aa', textAlign: 'center' }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #fed7aa', textAlign: 'center' }}>
                                   {student.group === 'Group A' ? '০৯:৫৫ AM' : '০৮:৪৫ AM'}
                                 </td>
-                                <td style={{ padding: '0.45rem 0.6rem', border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800 }}>
+                                <td style={{ padding: '0.25rem 0.45rem', border: '1px solid #fed7aa', textAlign: 'center', fontWeight: 800 }}>
                                   {student.vivaSlot || '10:05 AM - 10:55 AM'}
                                 </td>
                               </tr>
@@ -776,34 +813,34 @@ export default function ResultPage() {
                         </div>
 
                         {/* Instructions */}
-                        <div style={{ fontSize: '0.72rem', color: '#475569', marginBottom: '1.25rem', lineHeight: '1.35', background: '#f8fafc', padding: '0.45rem 0.65rem', borderRadius: '0.35rem', border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: '0.62rem', color: '#475569', marginBottom: '0.25rem', lineHeight: '1.25', background: '#f8fafc', padding: '0.25rem 0.45rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }}>
                           <strong>পরীক্ষার্থীর জরুরি নির্দেশনাবলী:</strong> {examInfo.instructions || '১. প্রবেশপত্র ছাড়া পরীক্ষা কক্ষে প্রবেশ নিষেধ। ২. লিখিত পরীক্ষা ও ভাইভায় নিজ নিজ সময়ে উপস্থিত থাকতে হবে। ৩. মোবাইল বা কোনো ডিজিটাল ডিভাইস হলে আনা সম্পূর্ণ নিষিদ্ধ।'}
                         </div>
 
                         {/* Signatures */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '0.75rem', borderTop: '1px dashed #cbd5e1' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '0.25rem', borderTop: '1px dashed #cbd5e1' }}>
                           <div style={{ textAlign: 'center' }}>
-                            <div style={{ borderTop: '1.5px solid #004b99', width: '160px', paddingTop: '0.2rem', fontSize: '0.75rem', fontWeight: 700, color: '#004b99' }}>
+                            <div style={{ borderTop: '1.2px solid #004b99', width: '130px', paddingTop: '0.15rem', fontSize: '0.68rem', fontWeight: 700, color: '#004b99' }}>
                               ক্যান্ডিডেট স্বাক্ষর
                             </div>
                           </div>
 
                           <div style={{ textAlign: 'center' }}>
-                            <div style={{ borderTop: '1.5px solid #004b99', width: '180px', paddingTop: '0.2rem', fontSize: '0.75rem', fontWeight: 700, color: '#004b99' }}>
+                            <div style={{ borderTop: '1.2px solid #004b99', width: '150px', paddingTop: '0.15rem', fontSize: '0.68rem', fontWeight: 700, color: '#004b99' }}>
                               আহ্বায়ক, আইসিটি অলিম্পিয়াড
                             </div>
                           </div>
 
                           <div style={{ textAlign: 'center' }}>
-                            <div style={{ borderTop: '1.5px solid #004b99', width: '180px', paddingTop: '0.2rem', fontSize: '0.75rem', fontWeight: 700, color: '#004b99' }}>
+                            <div style={{ borderTop: '1.2px solid #004b99', width: '150px', paddingTop: '0.15rem', fontSize: '0.68rem', fontWeight: 700, color: '#004b99' }}>
                               পরীক্ষা নিয়ন্ত্রক
                             </div>
                           </div>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </React.Fragment>
+                  );
+                })}
               </div>
             ));
           })()}
@@ -1912,33 +1949,48 @@ export default function ResultPage() {
         @media print {
           @page {
             size: A4 portrait;
-            margin: 0;
+            margin: 6mm 6mm;
           }
           body {
             background: white !important;
-            margin: 0;
-            padding: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           .print-page-break {
             page-break-before: always !important;
             break-before: page !important;
+          }
+          .admit-a4-page {
+            width: 198mm !important;
+            height: 284mm !important;
+            max-height: 284mm !important;
+            margin: 0 auto !important;
             padding: 0 !important;
-            margin: 0 !important;
-            height: 297mm;
+            box-sizing: border-box !important;
+            page-break-after: always !important;
+            break-after: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .admit-a4-page > div {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
           .container {
-            width: 210mm !important;
+            width: 198mm !important;
             height: auto !important;
             max-width: none !important;
             padding: 0 !important;
-            margin: 0 !important;
+            margin: 0 auto !important;
           }
           .no-print {
             display: none !important;
           }
           #printable-area {
-            width: 210mm;
-            margin: 0 auto;
+            width: 198mm !important;
+            margin: 0 auto !important;
           }
           * {
             -webkit-print-color-adjust: exact !important;
