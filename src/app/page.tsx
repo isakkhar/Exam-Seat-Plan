@@ -2,16 +2,10 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { useSeatPlan, SeatingPattern, GALA_CLASSES } from '@/context/SeatPlanContext';
-import RoomManager from '@/components/RoomManager';
-import FileUploader from '@/components/FileUploader';
+import { useSeatPlan, GALA_CLASSES, GROUP_A_CLASSES } from '@/context/SeatPlanContext';
 import { 
   LayoutGrid, 
   Users, 
-  Trash2, 
-  Download, 
-  AlertTriangle, 
-  CheckCircle2, 
   BookOpen, 
   Building2,
   Compass,
@@ -19,7 +13,10 @@ import {
   CheckCircle,
   Clock,
   Layers,
-  Award
+  Award,
+  ArrowRight,
+  ShieldCheck,
+  BadgeCheck
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -31,15 +28,11 @@ export default function Dashboard() {
     setExamInfo, 
     seatingPattern,
     setSeatingPattern,
-    generatePlan, 
-    loadGalaPreset,
-    clearAll 
+    generatePlan
   } = useSeatPlan();
 
   const totalSeats = rooms.reduce((acc, r) => acc + r.capacity, 0);
   const totalStudents = students.length;
-  const isShortage = totalSeats < totalStudents && totalStudents > 0;
-  const surplusSeats = totalSeats - totalStudents;
 
   // Class-wise count
   const classBreakdown = students.reduce((acc, s) => {
@@ -53,24 +46,8 @@ export default function Dashboard() {
     router.push('/result');
   };
 
-  const handleDownloadSample = () => {
-    // 13 Gala classes sample
-    let sampleRows = "ID,Name,Class\n";
-    GALA_CLASSES.forEach((c, idx) => {
-      sampleRows += `ICTOB-${1001 + idx * 10},Student ${idx + 1}A,${c}\n`;
-      sampleRows += `ICTOB-${1002 + idx * 10},Student ${idx + 1}B,${c}\n`;
-    });
-    const encodedUri = encodeURI("data:text/csv;charset=utf-8," + sampleRows);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "ict_olympiad_sample_students.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   return (
-    <main className="container">
+    <main className="container" style={{ paddingBottom: '3rem' }}>
       {/* Header with ICT Olympiad Bangladesh Brand Colors & Logos */}
       <header className="glass-card" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.25rem', padding: '1.25rem 1.75rem', borderTop: '4px solid var(--primary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
@@ -89,25 +66,18 @@ export default function Dashboard() {
               ICT Olympiad Seat Plan & Exam System
             </h1>
             <p style={{ color: 'var(--text-muted)', marginTop: '0.2rem', fontSize: '0.9rem' }}>
-              লিখিত ও ভাইভা পরীক্ষার প্যারালাল সিট প্ল্যান, ৩x৩ ডেস্ক স্লিপ, নোটিশ বোর্ড চার্ট ও আধুনিক এডমিট কার্ড।
+              ১৩টি ক্যাটাগরির ১৩০ জন ফাইনালিস্টের প্যারালাল পরীক্ষা, ৩x৩ ডেস্ক স্লিপ, নোটিশ বোর্ড চার্ট, এডমিট কার্ড ও রেজাল্ট শিট।
             </p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div>
           <button 
-            onClick={loadGalaPreset} 
+            onClick={handleGenerate} 
             className="button button-accent"
-            style={{ fontWeight: 800 }}
-            title="Load 130 students across 13 classes with 5 rooms and parallel schedule"
+            style={{ fontWeight: 800, padding: '0.75rem 1.6rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            <Award size={18} /> Load Season 3 Gala Preset (130)
-          </button>
-          <button onClick={handleDownloadSample} className="button button-secondary" style={{ background: 'transparent', border: '1.5px solid var(--secondary)', color: 'var(--secondary)', boxShadow: 'none' }}>
-            <Download size={18} /> Sample CSV
-          </button>
-          <button onClick={clearAll} className="button" style={{ background: '#ef4444', boxShadow: 'none' }}>
-            <Trash2 size={18} /> Reset
+            <LayoutGrid size={20} /> সিট প্ল্যান ও এডমিট কার্ড দেখুন <ArrowRight size={18} />
           </button>
         </div>
       </header>
@@ -117,7 +87,7 @@ export default function Dashboard() {
         background: 'linear-gradient(135deg, rgba(0, 75, 153, 0.08), rgba(0, 163, 224, 0.08))', 
         border: '1.5px solid var(--primary-border)', 
         borderRadius: '0.75rem', 
-        padding: '1rem 1.5rem', 
+        padding: '1.25rem 1.75rem', 
         marginBottom: '2rem',
         display: 'flex',
         justifyContent: 'space-between',
@@ -125,28 +95,86 @@ export default function Dashboard() {
         flexWrap: 'wrap',
         gap: '1rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: 'var(--primary)', color: '#fff', padding: '0.6rem', borderRadius: '0.5rem' }}>
-            <Clock size={24} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+          <div style={{ background: 'var(--primary)', color: '#fff', padding: '0.75rem', borderRadius: '0.6rem' }}>
+            <Clock size={28} />
           </div>
           <div>
-            <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1rem' }}>
+            <div style={{ fontWeight: 800, color: 'var(--primary)', fontSize: '1.05rem', marginBottom: '0.25rem' }}>
               প্যারালাল পরীক্ষা পদ্ধতি (Parallel Written & Viva Voce: 09:00 AM - 11:00 AM)
             </div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
               • <strong>Slot 1 (09:00 - 09:50 AM):</strong> Group A লিখিত (Room 101, 102) | Group B ভাইভা (Room 103, 104, 105 এর ৫টি বোর্ডে)<br />
               • <strong>Slot 2 (10:05 - 10:55 AM):</strong> Group B লিখিত (Room 101, 102) | Group A ভাইভা (Room 103, 104, 105 এর ৫টি বোর্ডে)
             </div>
           </div>
         </div>
-        <div>
-          <button 
-            onClick={handleGenerate} 
-            className="button"
-            style={{ fontWeight: 800, padding: '0.65rem 1.4rem' }}
-          >
-            <LayoutGrid size={18} /> সিট প্ল্যান ও এডমিট কার্ড দেখুন
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: '#ffffff', padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid var(--primary-border)' }}>
+          <ShieldCheck size={20} color="#16a34a" />
+          <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#15803d' }}>
+            ১৩টি ক্যাটাগরির ডাটা কনফিগারেশন সক্রিয়
+          </span>
+        </div>
+      </div>
+
+      {/* Capacity & Stats Bar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--primary)' }}>
+          <div style={{ background: 'var(--primary-tint)', padding: '0.85rem', borderRadius: '0.75rem', color: 'var(--primary)' }}>
+            <Building2 size={28} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>মোট রুম ও আসন</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
+              {rooms.length} Rooms / {totalSeats} Seats
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>রুম ১০১ ও ১০২ (লিখিত) + ১০৩, ১০৪, ১০৫ (ভাইভা)</div>
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--secondary)' }}>
+          <div style={{ background: 'rgba(0, 163, 224, 0.1)', padding: '0.85rem', borderRadius: '0.75rem', color: 'var(--secondary)' }}>
+            <Users size={28} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>মোট ফাইনালিস্ট পরীক্ষার্থী</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>
+              {totalStudents} জন পরীক্ষার্থী
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              ১৩টি ক্যাটাগরি × ১০ জন = ১৩০ জন
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #8b5cf6' }}>
+          <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '0.85rem', borderRadius: '0.75rem', color: '#8b5cf6' }}>
+            <Layers size={28} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>গ্রুপ বিভাজন (প্যারালাল)</div>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#6d28d9' }}>
+              Group A: ৭০ | Group B: ৬০
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              ক্লাস ১-৭ (Group A) ও ক্লাস ৮-Eng (Group B)
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid #f59e0b' }}>
+          <div style={{ background: 'rgba(245, 158, 11, 0.12)', padding: '0.85rem', borderRadius: '0.75rem', color: '#b45309' }}>
+            <Award size={28} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>শীর্ষ বিজয়ী ও পদক</div>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#b45309' }}>
+              ৩৯ জন গ্র্যান্ড বিজয়ী
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              ১৩ চ্যাম্পিয়ন, ১৩ ১ম রানার আপ, ১৩ ২য় রানার আপ
+            </div>
+          </div>
         </div>
       </div>
 
@@ -199,7 +227,7 @@ export default function Dashboard() {
             </label>
             <input 
               className="input" 
-              placeholder="e.g. Saturday | 09:00 AM - 11:00 AM"
+              placeholder="e.g. Saturday | 09:00 AM - 11:00 AM" 
               value={examInfo.date}
               onChange={e => setExamInfo(prev => ({ ...prev, date: e.target.value }))}
             />
@@ -220,7 +248,7 @@ export default function Dashboard() {
                 <CheckCircle size={15} color="var(--primary)" /> অফিশিয়াল লোগো ও ব্র্যান্ডিং সক্রিয়
               </div>
               <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
-                সিট স্লিপ, এডমিট কার্ড, নোটিশ বোর্ড ও উপস্থিতি শিটে স্বয়ংক্রিয়ভাবে দৃশ্যমান
+                সিট স্লিপ, এডমিট কার্ড, নোটিশ বোর্ড ও রেজাল্ট শিটে স্বয়ংক্রিয়ভাবে দৃশ্যমান
               </span>
             </div>
           </div>
@@ -289,147 +317,141 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Capacity & Stats Bar */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
-        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--primary)' }}>
-          <div style={{ background: 'var(--primary-tint)', padding: '0.85rem', borderRadius: '0.75rem', color: 'var(--primary)' }}>
-            <Building2 size={28} />
-          </div>
+      {/* Gala Round Venue & Exam Halls Layout Overview */}
+      <section className="glass-card" style={{ marginBottom: '2rem', borderTop: '4px solid var(--secondary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>মোট রুম ও আসন</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--primary)' }}>
-              {rooms.length} Rooms / {totalSeats} Seats
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>সিঙ্গেল চেয়ার (১ জন/চেয়ার)</div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--secondary)' }}>
+              <Building2 size={20} color="var(--secondary)" /> গালা রাউন্ড ভেন্যু ও পরীক্ষার রুম বিন্যাস (Fixed Halls & Boards)
+            </h3>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              লিখিত পরীক্ষা ও ভাইভা মূল্যায়নের জন্য নির্ধারিত ৫টি অফিশিয়াল রুম
+            </p>
           </div>
+          <span style={{ fontSize: '0.78rem', background: '#dcfce7', color: '#15803d', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontWeight: 800, border: '1px solid #bbf7d0' }}>
+            ✓ ৫টি রুম ও ৫টি ভাইভা বোর্ড কনফিগার করা
+          </span>
         </div>
 
-        <div className="glass-card" style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: '4px solid var(--secondary)' }}>
-          <div style={{ background: 'rgba(0, 163, 224, 0.1)', padding: '0.85rem', borderRadius: '0.75rem', color: 'var(--secondary)' }}>
-            <Users size={28} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>মোট পরীক্ষার্থী</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--secondary)' }}>
-              {totalStudents} Candidates
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              {Object.keys(classBreakdown).length} টি ক্যাটাগরি / ক্লাস
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card" style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '1rem',
-          borderLeft: isShortage ? '4px solid #ef4444' : '4px solid var(--primary)'
-        }}>
-          <div style={{ 
-            background: isShortage ? 'rgba(239, 68, 68, 0.12)' : 'var(--primary-tint)', 
-            padding: '0.85rem', 
-            borderRadius: '0.75rem', 
-            color: isShortage ? '#ef4444' : 'var(--primary)' 
-          }}>
-            {isShortage ? <AlertTriangle size={28} /> : <CheckCircle2 size={28} />}
-          </div>
-          <div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>ক্যাপাসিটি ও ব্যালান্স</div>
-            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isShortage ? '#ef4444' : 'var(--primary)' }}>
-              {totalStudents === 0 ? 'গালা প্রিসেট লোড করুন' : isShortage ? `সিট ঘাটতি: ${totalStudents - totalSeats} টি` : `পর্যাপ্ত (${surplusSeats} টি সিট অতিরিক্ত)`}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-              {isShortage ? 'অনুগ্রহ করে আরো রুম যোগ করুন' : 'প্যারালাল পরীক্ষার জন্য প্রস্তুত'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Room Manager & File Uploader */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem', marginBottom: '2rem' }}>
-        <RoomManager />
-        <FileUploader />
-      </div>
-
-      {/* Uploaded Students Preview */}
-      {students.length > 0 && (
-        <div className="glass-card" style={{ marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0, color: 'var(--primary)' }}>
-                <Users size={24} color="var(--primary)" /> তালিকাভুক্ত শিক্ষার্থী ({students.length})
-              </h2>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.5rem' }}>
-                {Object.entries(classBreakdown).map(([cls, count]) => (
-                  <span key={cls} style={{ fontSize: '0.75rem', background: 'var(--primary-tint)', color: 'var(--primary)', padding: '0.2rem 0.55rem', borderRadius: '0.35rem', border: '1px solid var(--primary-border)', fontWeight: 700 }}>
-                    <strong>{cls}:</strong> {count} জন
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <button 
-              onClick={handleGenerate} 
-              className="button" 
-              disabled={rooms.length === 0}
-              style={{ fontSize: '1.05rem', padding: '0.85rem 1.85rem', opacity: rooms.length === 0 ? 0.5 : 1 }}
-            >
-              <LayoutGrid size={22} /> Generate Seat Plan & Admit Cards
-            </button>
-          </div>
-
-          <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Roll / ID</th>
-                  <th>Student Name</th>
-                  <th>Category / Class</th>
-                  <th>Institution / School</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.slice(0, 15).map((s, idx) => (
-                  <tr key={`${s.id}-${idx}`}>
-                    <td><span style={{ fontWeight: 700, color: 'var(--foreground)' }}>{s.id}</span></td>
-                    <td>{s.name}</td>
-                    <td>
-                      <span style={{ background: 'var(--primary-tint)', color: 'var(--primary)', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.85rem', fontWeight: 700, border: '1px solid var(--primary-border)' }}>
-                        {s.className}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+          {rooms.map(room => {
+            const isWritten = room.roomType === 'written';
+            return (
+              <div 
+                key={room.id}
+                style={{
+                  background: isWritten ? '#eff6ff' : '#f0fdf4',
+                  border: isWritten ? '1.5px solid #bfdbfe' : '1.5px solid #bbf7d0',
+                  borderRadius: '0.65rem',
+                  padding: '1rem',
+                  textAlign: 'center'
+                }}
+              >
+                <div style={{ fontSize: '0.75rem', fontWeight: 800, color: isWritten ? '#1d4ed8' : '#15803d', textTransform: 'uppercase', marginBottom: '0.25rem' }}>
+                  {isWritten ? '📝 লিখিত পরীক্ষার হল' : '🎙️ ভাইভা বোর্ড ভেন্যু'}
+                </div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a' }}>
+                  Room {room.name}
+                </div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                  ধারণক্ষমতা: {room.capacity} আসন ({room.rows}×{room.cols})
+                </div>
+                {room.vivaBoards && room.vivaBoards.length > 0 && (
+                  <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'center', gap: '0.3rem', flexWrap: 'wrap' }}>
+                    {room.vivaBoards.map(b => (
+                      <span key={b} style={{ fontSize: '0.7rem', fontWeight: 800, background: '#16a34a', color: '#fff', padding: '0.15rem 0.5rem', borderRadius: '0.25rem' }}>
+                        {b}
                       </span>
-                    </td>
-                    <td>
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                        {s.institution || '—'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-                {students.length > 15 && (
-                  <tr>
-                    <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', fontStyle: 'italic' }}>
-                      ...এবং আরো {students.length - 15} জন শিক্ষার্থীর তালিকা
-                    </td>
-                  </tr>
+                    ))}
+                  </div>
                 )}
-              </tbody>
-            </table>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 13 Categories Finalists Distribution Card */}
+      <section className="glass-card" style={{ marginBottom: '2.5rem', borderTop: '4px solid #8b5cf6' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6d28d9' }}>
+              <Users size={20} color="#8b5cf6" /> ১৩টি ক্যাটাগরির ফাইনালিস্ট তালিকা (১৩০ জন শিক্ষার্থী)
+            </h3>
+            <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+              প্রতিটি ক্লাসের শীর্ষ ১০ জন করে ফাইনালিস্ট ইতিমধ্যে সিস্টেমে তালিকাভুক্ত
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', background: '#eff6ff', color: '#1d4ed8', padding: '0.25rem 0.65rem', borderRadius: '0.35rem', fontWeight: 800, border: '1px solid #bfdbfe' }}>
+              Group A (Class 1-7): ৭০ জন
+            </span>
+            <span style={{ fontSize: '0.78rem', background: '#f5f3ff', color: '#6d28d9', padding: '0.25rem 0.65rem', borderRadius: '0.35rem', fontWeight: 800, border: '1px solid #ddd6fe' }}>
+              Group B (Class 8-Eng): ৬০ জন
+            </span>
           </div>
         </div>
-      )}
 
-      {rooms.length === 0 && students.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '3.5rem', background: 'var(--card-bg)', borderRadius: '1rem', border: '1.5px dashed var(--primary-border)' }}>
-          <Award size={64} style={{ margin: '0 auto 1rem', display: 'block', color: 'var(--primary)' }} />
-          <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>ICT Olympiad Bangladesh - Season 3 Gala Round</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', maxWidth: '600px', margin: '0 auto 1.5rem auto' }}>
-            ১৩টি ক্যাটাগরির ১৩০ জন শিক্ষার্থী এবং ৫টি রুমের প্যারালাল সিট প্ল্যান ও এডমিট কার্ড এক ক্লিকেই তৈরি করতে নিচের বাটনে চাপ দিন:
-          </p>
-          <button onClick={loadGalaPreset} className="button button-accent" style={{ fontSize: '1.1rem', padding: '0.9rem 2rem' }}>
-            <Award size={22} /> Load Season 3 Gala Preset (130 Candidates)
-          </button>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+          {GALA_CLASSES.map((cls) => {
+            const count = classBreakdown[cls] || 10;
+            const isGroupA = GROUP_A_CLASSES.includes(cls);
+            return (
+              <div 
+                key={cls}
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  background: isGroupA ? '#eff6ff' : '#f8fafc',
+                  border: isGroupA ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                  borderRadius: '0.45rem',
+                  padding: '0.6rem 0.85rem'
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem', color: '#0f172a' }}>
+                    {cls}
+                  </div>
+                  <div style={{ fontSize: '0.7rem', color: isGroupA ? '#2563eb' : '#64748b', fontWeight: 700 }}>
+                    {isGroupA ? 'Group A (Slot 1)' : 'Group B (Slot 2)'}
+                  </div>
+                </div>
+                <div style={{ background: isGroupA ? '#1d4ed8' : '#334155', color: '#fff', borderRadius: '1rem', padding: '0.15rem 0.55rem', fontSize: '0.75rem', fontWeight: 900 }}>
+                  {count} জন
+                </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </section>
+
+      {/* Prominent Call to Action Footer Card */}
+      <div 
+        className="glass-card" 
+        style={{ 
+          textAlign: 'center', 
+          padding: '2.5rem 2rem', 
+          background: 'linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%)', 
+          border: '2px solid var(--primary-border)',
+          borderRadius: '1rem'
+        }}
+      >
+        <BadgeCheck size={52} color="#004b99" style={{ margin: '0 auto 0.75rem auto' }} />
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#004b99', margin: '0 0 0.5rem 0' }}>
+          গালা রাউন্ডের সিট প্ল্যান, এডমিট কার্ড ও রেজাল্ট শিট প্রস্তুত!
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', maxWidth: '650px', margin: '0 auto 1.5rem auto' }}>
+          ডেস্ক স্লিপ (৩x৩), অফিশিয়াল এডমিট কার্ড (প্রতি পাতায় ২টি), দরজার নোটিশ চার্ট, উপস্থিতি শিট, ভাইভা ইভ্যালুয়েশন শিট এবং ৩৯ জন বিজয়ীর ফাইনাল অ্যাওয়ার্ড শিট প্রিন্ট করতে নিচের বাটনে ক্লিক করুন:
+        </p>
+        <button 
+          onClick={handleGenerate}
+          className="button button-accent"
+          style={{ fontSize: '1.15rem', fontWeight: 900, padding: '0.95rem 2.5rem', boxShadow: '0 8px 25px rgba(0, 75, 153, 0.25)' }}
+        >
+          <LayoutGrid size={22} /> সিট প্ল্যান ও এডমিট কার্ড পেজে প্রবেশ করুন →
+        </button>
+      </div>
     </main>
   );
 }

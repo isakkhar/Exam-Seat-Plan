@@ -114,8 +114,8 @@ interface SeatPlanContextType {
 const SeatPlanContext = createContext<SeatPlanContextType | undefined>(undefined);
 
 export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
+  const [rooms, setRooms] = useState<Room[]>(DEFAULT_GALA_ROOMS);
+  const [students, setStudents] = useState<Student[]>(OFFICIAL_GALA_STUDENTS);
   const [assignments, setAssignments] = useState<Record<string, AllocatedStudent[]>>({});
   const [seatingPattern, setSeatingPattern] = useState<SeatingPattern>('snake');
   const [examInfo, setExamInfo] = useState<ExamInfo>({
@@ -127,39 +127,13 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     instructions: '১. প্রবেশপত্র ছাড়া পরীক্ষা কক্ষে প্রবেশ নিষেধ। ২. লিখিত পরীক্ষা সকাল ০৯:০০টা থেকে ০৯:৫০টা এবং ভাইভা সকাল ১০:০৫টা থেকে ১০:৫৫টার মধ্যে গ্রুপ অনুযায়ী অনুষ্ঠিত হবে। ৩. মোবাইল ও সব ধরণের ইলেকট্রনিক ডিভাইস সম্পূর্ণ নিষিদ্ধ।'
   });
 
-  // Load from localStorage
+  // Always initialize with official Gala Round 130 students and 5 rooms
   useEffect(() => {
-    const savedRooms = localStorage.getItem('seatplan_rooms');
-    const savedStudents = localStorage.getItem('seatplan_students');
-    const savedAssignments = localStorage.getItem('seatplan_assignments');
     const savedExamInfo = localStorage.getItem('seatplan_exam_info');
     const savedPattern = localStorage.getItem('seatplan_pattern');
 
-    let loadedRooms: Room[] = DEFAULT_GALA_ROOMS;
-    let loadedStudents: Student[] = OFFICIAL_GALA_STUDENTS;
-    let needsRegen = false;
-
-    if (savedRooms) {
-      try { 
-        const parsed = JSON.parse(savedRooms);
-        if (Array.isArray(parsed) && parsed.length > 0) loadedRooms = parsed;
-      } catch (e) { console.error(e); }
-    }
-    if (savedStudents) {
-      try { 
-        const parsed = JSON.parse(savedStudents);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          if (parsed[0]?.id?.startsWith('ICTOB-')) {
-            loadedStudents = OFFICIAL_GALA_STUDENTS;
-            needsRegen = true;
-          } else {
-            loadedStudents = parsed;
-          }
-        }
-      } catch (e) { console.error(e); }
-    }
-    setRooms(loadedRooms);
-    setStudents(loadedStudents);
+    setRooms(DEFAULT_GALA_ROOMS);
+    setStudents(OFFICIAL_GALA_STUDENTS);
 
     if (savedExamInfo) {
       try { setExamInfo(JSON.parse(savedExamInfo)); } catch (e) { console.error(e); }
@@ -168,14 +142,10 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
       setSeatingPattern(savedPattern as SeatingPattern);
     }
 
-    if (savedAssignments && !needsRegen) {
-      try { setAssignments(JSON.parse(savedAssignments)); } catch (e) { console.error(e); }
-    } else {
-      generatePlan(loadedRooms, loadedStudents);
-    }
+    generatePlan(DEFAULT_GALA_ROOMS, OFFICIAL_GALA_STUDENTS);
   }, []);
 
-  // Save to localStorage
+  // Save config to localStorage
   useEffect(() => {
     localStorage.setItem('seatplan_rooms', JSON.stringify(rooms));
     localStorage.setItem('seatplan_students', JSON.stringify(students));
@@ -184,16 +154,16 @@ export function SeatPlanProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('seatplan_pattern', seatingPattern);
   }, [rooms, students, assignments, examInfo, seatingPattern]);
 
-  // Distinct classes from uploaded students
+  // Distinct classes from official gala students
   const availableClasses = Array.from(new Set(students.map(s => s.className.trim()))).filter(Boolean);
 
   const addRoom = (room: Room) => setRooms(prev => [...prev, room]);
   const removeRoom = (id: string) => setRooms(prev => prev.filter(r => r.id !== id));
   
   const clearAll = () => {
-    setRooms([]);
-    setStudents([]);
-    setAssignments({});
+    setRooms(DEFAULT_GALA_ROOMS);
+    setStudents(OFFICIAL_GALA_STUDENTS);
+    generatePlan(DEFAULT_GALA_ROOMS, OFFICIAL_GALA_STUDENTS);
     localStorage.removeItem('seatplan_rooms');
     localStorage.removeItem('seatplan_students');
     localStorage.removeItem('seatplan_assignments');
